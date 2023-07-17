@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<taglib uri="http://java.sun.com/jstl/core" prefix="c"/>
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>信息修改</title>
+
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <!-- 走两级 -->
+    <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+    <script th:src="@{/assets/layui.js}"></script>
+
+</head>
+<body>
+<form class="layui-form layuimini-form"  action="" style="margin-left: 30px" lay-filter="editForm">
+  <div class="layui-form-item">
+    <label class="layui-form-label required">用户名|ID</label>
+    <div class="layui-input-block">
+      <input type="number" name="id" readonly lay-verify="required" value="" class="layui-input">
+    </div>
+  </div>
+
+  <div class="layui-form-item">
+    <label class="layui-form-label required">姓名</label>
+    <div class="layui-input-block">
+      <input type="text" name="name" lay-verify="required" readonly lay-reqtext="姓名不能为空" placeholder="请输入姓名" value="" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label required">性别</label>
+    <div class="layui-input-block">
+      <input type="text" name="sex" readonly value="" class="layui-input">
+
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label required">年龄</label>
+    <div class="layui-input-block">
+      <input type="number" name="age" readonly lay-verify="required" lay-reqtext="年龄不能为空" placeholder="请输入年龄" value="" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label required">手机</label>
+    <div class="layui-input-block">
+      <input type="number" name="phone" readonly lay-verify="required" lay-reqtext="手机不能为空" placeholder="请输入手机" value="" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label for="email" class="layui-form-label">邮箱</label>
+    <div class="layui-input-block">
+      <input type="text" id="email" name="email" required class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label required">密码</label>
+    <div class="layui-input-block">
+      <input type="number" name="password" readonly lay-verify="required" lay-reqtext="密码不能为空" placeholder="请输入密码" value="" class="layui-input">
+    </div>
+  </div>
+
+</form>
+
+<script th:src="@{/assets/layui.js}"></script>
+<script>
+  layui.use(['form'], function () {
+    var form = layui.form,
+        layer = layui.layer,
+        $ = layui.$;
+
+    //监听提交
+    form.on('submit(saveBtn)', function (data) {
+      console.log(data)
+      $.ajax({
+        url:'/user/modify',
+        type:'post',
+        data : $(data.form).serialize(),
+        success:function (response) {
+          if(response.msg == '1'){
+            layer.msg("修改成功", {icon: 6});
+            setTimeout(function(){
+              var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+              parent.layer.close(index);//关闭弹出层
+              window.parent.location.reload();
+              layer.closeAll();//关闭所有的弹出层
+            }, 1000);
+          } else{
+            layer.msg("修改失败", {icon: 5});
+          }
+        }
+      })
+      return false;
+    });
+
+  });
+</script>
+
+<script>
+  layui.use(['form', 'layedit', 'laydate'], function () {
+    var form = layui.form
+        , layer = layui.layer
+        , layedit = layui.layedit
+        , laydate = layui.laydate;
+
+    //日期
+    laydate.render({
+      elem: '#date' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#date1'
+    });
+
+    //创建一个编辑器
+    var editIndex = layedit.build('LAY_demo_editor');
+
+    //自定义验证规则
+    form.verify({
+      title: function (value) {
+        if (value.length < 5) {
+          return '标题至少得5个字符啊';
+        }
+      }
+      , pass: [
+        /^[\S]{6,12}$/
+        , '密码必须6到12位，且不能出现空格'
+      ]
+      , content: function (value) {
+        layedit.sync(editIndex);
+      }
+    });
+
+    //监听指定开关
+    form.on('switch(switchTest)', function (data) {
+      layer.msg('开关checked：' + (this.checked ? 'true' : 'false'), {
+        offset: '6px'
+      });
+      layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+    });
+
+    //监听提交
+    form.on('submit(demo1)', function (data) {
+      layer.alert(JSON.stringify(data.field), {
+        title: '最终的提交信息'
+      })
+      return false;
+    });
+
+    var value = [(${user})];
+
+    //表单初始赋值
+    form.val('editForm',
+        value
+    )
+
+    //获取表单区域所有值
+    var data1 = form.val("editForm");
+    console.log(value)
+
+    form.render()
+  });
+</script>
+</body>
+</html>

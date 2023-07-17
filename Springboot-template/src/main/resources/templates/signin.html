@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+    <script th:src="@{/assets/layui.js}"></script>
+    <script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+    <title>用户注册</title>
+
+    <script>
+        layui.use('form', function () {
+            var form = layui.form;
+            form.render(); //刷新select选择框渲染
+        });
+
+        layui.use('element', function(){
+            var element = layui.element;
+            //一些事件触发
+            element.on('tab(demo)', function(data){
+                console.log(data);
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        var paramobj = {};
+        window.onload = function () {
+            //此时parameterURL为:name=张三&age=25
+            var parameterURL = location.search.substring(1, location.search.length);
+            //此时paramArr为一个数组:["name=张三","age=25"]
+            var paramArr = parameterURL.split("&");
+            var temp;
+            //定义2个变量接收key，value并存到paramobj中
+            for (i = 0; i < paramArr.length; i++) {
+                temp = paramArr[i].split("=");
+                if (temp.length === 1) {
+                    paramobj[temp[0]] = "";
+                }
+                else if(temp.length>1){
+                    for (j = 0; j < temp.length; j++) {
+                        paramobj[temp[0]] = decodeURIComponent(temp[1]);
+                    }
+                }
+            }
+            //此时参数已全部保存至paramobj中,这里显示到div
+            var showStr="";
+            var email = '';
+            var i = 0;
+            for (var a in paramobj) {
+                if(i === 0)
+                    email = paramobj[a];
+                showStr += (a + ":" + paramobj[a]);
+                i++;
+            }
+            console.log(showStr, email)
+            var input = document.getElementById("email");  //获取input对象
+            input.setAttribute("value", email);  //为input对象设置value属性和值
+            $("#email").text(email);
+            //document.getElementById("mail").innerText = email;
+        }
+    </script>
+
+    <script>
+        layui.use('form', function(){
+            var form = layui.form;
+            form.on('submit(formDemo)', function(data){
+                data = data.field
+                console.log(data)
+                console.log(data.field)
+                console.log(data.form)
+                //监听提交
+                $.ajax({
+                    url : '/admin/signIn',
+                    type : 'post',
+                    data : {
+                        id: data.id,
+                        username: data.username,
+                        password: data.password,
+                        email: data.email
+                    },
+                    success : function(response) {
+                        if (response.code == '1') {
+                            layer.msg("登录成功", {icon: 6});
+                            setTimeout(function(){
+                                var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                                parent.layer.close(index);      //关闭弹出层
+                                //带参跳转
+                                parent.window.location.href = "/admin/toMain?username="
+                                    + window.decodeURIComponent(response.data.username) + "&id=" + window.decodeURIComponent(response.data.id);
+                            }, 1000);
+                        } else {
+                            layer.msg("登录失败", {icon: 5});
+                        }
+                    }
+                })
+                return false;
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container" style="width: 100%">
+    <div class="layui-card" style="text-align: center;">
+        <h3><div class="layui-card-header layui-bg-cyan">用户注册</div></h3>
+    </div>
+
+    <form class="layui-form" method="post" action="" style="width: 60%; float:left; margin-left:15% ">
+        <input type="hidden" name="id"  value="2" class="layui-input">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" required  placeholder="请输入用户名" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="password" class="layui-form-label">密码</label>
+            <div class="layui-input-block">
+                <input type="text" id="password" name="password"  required  placeholder="请输入密码" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="email" class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" id="email" name="email" required class="layui-input" placeholder="请输入邮箱">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link th:href="@{/assets/css/theme.css}" rel="stylesheet">
+    <link th:href="@{/assets/css/demo.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <script th:src="@{/assets/layui.js}"></script>
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+    <title>展示新闻信息</title>
+
+  <script>
+    console.log(news);
+    var html = news.
+    $('#newsshow').html(html);
+  </script>
+
+</head>
+<body>
+
+<section class="slice slice-lg" data-delimiter="1">
+  <div class="container">
+    <div class="mb-md text-center">
+      <h2 class="heading h2"></h2>
+      <div class="fluid-paragraph text-center mt-4">
+        <p class="lead lh-200" >
+          [[${news.title}]]
+        </p>
+      </div>
+    </div>
+    <div class="row cols-xs-space cols-sm-space cols-md-space">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body text-center">
+            <div id="newshow" th:utext="${news.content}">
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <p class="mt-1" style="margin-left: 80%">
+        发布时间: [[${time}]]
+<!--        <span th:text="${#temporals.format(news.time, 'yyyy-MM-dd HH:mm:ss')}"></span>-->
+
+      </p>
+    </div>
+  </div>
+</section>
+
+<script th:src="@{/assets/layui.js}"></script>
+<script>
+
+  layui.use(['form'], function () {
+    var form = layui.form,
+        layer = layui.layer,
+        $ = layui.$;
+
+    //监听提交
+    form.on('submit(saveBtn)', function (data) {
+      $.ajax({
+        url:'/news/save',
+        type:'post',
+        data : $(data.form).serialize(),
+        success:function (response) {
+          if(response.msg == '1'){
+            layer.msg("添加成功", {icon: 6});
+            setTimeout(function(){
+              var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+              parent.layer.close(index);//关闭弹出层
+              window.parent.location.reload();
+              layer.closeAll();//关闭所有的弹出层
+            }, 1000);
+          } else{
+            layer.msg("添加失败", {icon: 5});
+          }
+        }
+      })
+      return false;
+    });
+
+  });
+</script>
+
+<script>
+  layui.use(['form', 'layedit', 'laydate'], function () {
+    var form = layui.form
+        , layer = layui.layer
+        , layedit = layui.layedit
+        , laydate = layui.laydate;
+
+    //日期
+    laydate.render({
+      elem: '#time' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#time'
+    });
+
+    //创建一个编辑器
+    var editIndex = layedit.build('LAY_demo_editor');
+
+    //自定义验证规则
+    form.verify({
+      title: function (value) {
+        if (value.length < 5) {
+          return '标题至少得5个字符啊';
+        }
+      }
+      , pass: [
+        /^[\S]{6,12}$/
+        , '密码必须6到12位，且不能出现空格'
+      ]
+      , content: function (value) {
+        layedit.sync(editIndex);
+      }
+    });
+
+    //监听指定开关
+    form.on('switch(switchTest)', function (data) {
+      layer.msg('开关checked：' + (this.checked ? 'true' : 'false'), {
+        offset: '6px'
+      });
+      layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+    });
+
+    //监听提交
+    form.on('submit(demo1)', function (data) {
+      layer.alert(JSON.stringify(data.field), {
+        title: '最终的提交信息'
+      })
+      return false;
+    });
+  });
+</script>
+
+<!-- Core -->
+<script th:src="@{/assets/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/assets/vendor/popper/popper.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap/bootstrap.min.js}"></script>
+<!-- FontAwesome 5 -->
+<script th:src="@{/assets/vendor/fontawesome/js/fontawesome-all.min.js}" defer></script>
+<!-- Page plugins -->
+<script th:src="@{/assets/vendor/bootstrap-select/js/bootstrap-select.min.js}"></script>
+<script th:src="@{/assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.min.js}"></script>
+<script th:src="@{/assets/vendor/input-mask/input-mask.min.js}"></script>
+<script th:src="@{/assets/vendor/nouislider/js/nouislider.min.js}"></script>
+<script th:src="@{/assets/vendor/textarea-autosize/textarea-autosize.min.js}"></script>
+<!-- Theme JS -->
+<script th:src="@{/assets/js/theme.js}"></script>
+</body>
+</html>

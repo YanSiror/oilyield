@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/js/echarts.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/layui.js}"></script>
+  <script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+  <title>上传Excel</title>
+</head>
+<body>
+<div class="container" style="width: 100%">
+  <div class="layui-card" style="text-align: center;">
+      <h3><div class="layui-card-header layui-bg-cyan">油井产量分析趋势图</div></h3>
+  </div>
+
+  <form class="layui-form layuimini-form"  action="" style="margin-left: 30px" lay-filter="linechart">
+    <div class="layui-form-item">
+      <label class="layui-form-label">时间周期</label>
+      <div class="layui-input-inline">
+        <input type="text" id="date" name="startTime" class="layui-input">-
+        <input type="text" id="date2" name="endTime" class="layui-input">
+      </div>
+      <label class="layui-form-label">单井信息</label>
+      <div class="layui-input-inline">
+        <select name="name" lay-verify="required">
+          <option th:each="well:${wells}"
+                  th:value="${well.id}" th:text="${well.name}">
+          </option>
+        </select>
+        <button style="margin-left: 200px" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="getChart">获取</button>
+      </div>
+    </div>
+    <div class="layui-input-inline">
+    </div>
+  </form>
+
+  <div class="layui-row layui-col-space14" style="margin-top: 40px;">
+    <div class="layui-col-md6 layui-col-md-offset1" id="third" style="width:90%;height: 500px;"></div>
+  </div>
+</div>
+
+<script>
+  var chartDom = document.getElementById('third');
+  var mychart = echarts.init(chartDom);
+  option = {
+    title: {
+      text: '单井产量趋势图'
+    },
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['水', '液', '气', '油', '含水率', '总产量']
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: [{
+      data: [],
+    }],
+    yAxis: {
+      type: 'value',
+      scale: true,
+      min: 0,
+      max: 40,
+      interval: 2
+    },
+    series: [{
+      data: [],
+      type: 'line'
+    }]
+  };
+  option && mychart.setOption(option);
+</script>
+
+<script>
+  layui.use(['form'], function () {
+    var form = layui.form,
+        layer = layui.layer,
+        laydate = layui.laydate,
+        $ = layui.$;
+
+    //日期
+    laydate.render({
+      elem: '#date' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#date1'
+    });
+
+    //日期
+    laydate.render({
+      elem: '#date2' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#date2'
+    });
+
+    //监听提交
+    form.on('submit(getChart)', function (data) {
+      console.log(data.field)
+      $.ajax({
+        url:'/yield/showLine',
+        type:'post',
+        data :{
+          startTime: data.field.startTime,
+          endTime: data.field.endTime,
+          name: data.field.name
+        },
+        success:function (response) {
+          layer.msg("获取成功", {icon: 6});
+          setTimeout(1000);
+          console.log(response)
+
+          let datas = [];    // 新增一个数组变量
+          datas.push({
+            name: '水',
+            type: 'line',
+            data: response.waters
+          });    // 向数组中添加数据项
+          datas.push({
+            name: '液',
+            type: 'line',
+            data: response.liquids
+          });    // 向数组中添加数据项
+          datas.push({
+            name: '气',
+            type: 'line',
+            data: response.gases
+          });    // 向数组中添加数据项
+          datas.push({
+            name: '油',
+            type: 'line',
+            data: response.oils
+          });    // 向数组中添加数据项
+          datas.push({
+            name: '含水',
+            type: 'line',
+            data: response.rates
+          });    // 向数组中添加数据项
+          // datas.push({
+          //   name: '总产量',
+          //   type: 'line',
+          //   data: response.totals
+          // });    // 向数组中添加数据项
+
+          // 更新数据
+          let times = [];    // 新增一个数组变量
+          times.push({
+            type: 'category',
+            boundaryGap: false,
+            data: response.times
+          });    // 向数组中添加数据项
+
+          let yaxis = ({
+            type: 'value',
+            scale: true,
+            min: 0,
+            max: 40,
+            interval: 2
+          });
+
+          console.log(datas);
+          console.log(times);
+
+          option.series = datas;
+          option.xAxis = times;
+          option.yAxis = yaxis;
+          console.log(option);
+
+          // 重置
+          mychart.clear();
+          // 重新渲染
+          mychart.setOption(option);
+        }
+      })
+      return false;
+    });
+  });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+   <input th:value="${map.get('token')}" name="token" hidden>
+   <input th:value="${params.get('id')}" id="id" hidden>
+   <input th:value="${params.get('status')}" id="status" hidden>
+
+    <form class="layui-form layuimini-form"  action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">邮箱</label>
+            <div class="layui-input-inline">
+                <input type="text" id="email" name="email" readonly th:value="${params.get('email')}" lay-verify="email" lay-reqtext="邮箱不能为空" placeholder="请输入邮箱(XX@qq/163/gmail.com)" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">验证码</label>
+            <div class="layui-input-inline">
+                <input type="text" name="code" lay-verify="required" lay-reqtext="验证码不能为空" placeholder="请输入验证码" value="" class="layui-input">
+            </div>
+            <div class="layui-input-inline">
+                <input type="button" class="layui-btn layui-inline" id="send" value="发送验证码" onclick="sendCode()">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-normal"  lay-submit lay-filter="saveBtn">登录</button>
+            </div>
+        </div>
+    </form>
+    <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+    <script th:src="@{/assets/layui.js}"></script>
+    <script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+
+<script>
+    function sendCode(){
+      //设置按钮不可点击
+      document.getElementById("send").disabled = "true";
+      document.getElementById("send").className = "layui-btn layui-btn-disabled layui-inline";
+      var layer = layui.layer;
+      //获取开关的值
+      var mail = '';
+      mail = $("#email").val();        //获取邮箱
+      if (mail.length === 0) {
+          alert("邮箱不能为空")
+          layer.msg('邮箱不能为空');
+          return false;
+      }
+      var token = document.getElementsByName('token')[0].value;
+      var id = document.getElementById('id').value;
+      console.log(id, token);
+
+      $.ajax({
+            url:'/common/sendMail',
+            type: 'post',
+            async : false,  //同步请求
+            data : {
+              to: mail,
+            },
+            success:function (response) {
+                if(response.code === 0){
+                    layer.msg(response.msg, {icon: 6});
+                  setTimeout(function () {
+                    //带参跳转
+                    //使用验证码登录
+                  }, 1000);
+                }
+                //这里采用了, 邮箱注册的方式, 如果不存在该邮箱就提示用户完成注册
+                else if(response.code === 2) {
+                  layer.msg(response.msg, {icon: 5});
+                  setTimeout(function () {
+                    var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                    parent.layer.close(index);//关闭弹出层
+                    //带参跳转
+                    //使用验证码登录
+                  }, 1000);
+                } else if(response.code === 1){
+                  layer.msg(response.msg, {icon: 5});
+                  setTimeout(function () {
+                    var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                    parent.layer.close(index);//关闭弹出层
+                  }, 1000);
+                }
+            }
+        })
+    }
+
+    layui.use(['form'], function () {
+      var form = layui.form,
+          layer = layui.layer,
+          $ = layui.$;
+
+      var token = document.getElementsByName('token')[0].value;
+      var id = document.getElementById('id').value;
+      var status = document.getElementById('status').value;
+      console.log(id, token, status);
+      //监听提交
+      form.on('submit(saveBtn)', function (data) {
+          console.log(data)
+          $.ajax({
+              url:'/common/checkCode',
+              type:'post',
+              data : {
+                  status: status,
+                  code: data.field.code
+              },
+              success:function (response) {
+                  if(response.code === 0){
+                      layer.msg(response.msg, {icon: 6});
+                      setTimeout(function(){
+                        var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                        parent.layer.close(index);      //关闭弹出层
+                        if(status === '0'){
+                          parent.layer.open({
+                            //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                            type: 2,
+                            content: '/admin/loadData/'+id,
+                            area: ['40%', '40%'],
+                            offset: 'auto',
+                            title: '修改信息',
+                            id: 'signin' //设定一个id，防止重复弹出
+                          });
+                        } else if(status === '1'){
+                          parent.layer.open({
+                            //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                            type: 2,
+                            content:'/staff/loadData/'+id,
+                            area: ['40%', '40%'],
+                            offset: 'auto',
+                            title: '修改信息',
+                            id: 'signin' //设定一个id，防止重复弹出
+                          });
+                        } else if(status === '2'){
+                          parent.layer.open({
+                            //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                            type: 2,
+                            content: '/user/loadData/'+token,
+                            area: ['40%', '40%'],
+                            offset: 'auto',
+                            title: '修改信息',
+                            id: 'signin' //设定一个id，防止重复弹出
+                          });
+                        }
+                      }, 1000);
+                  }
+                  //这里采用了, 邮箱注册的方式, 如果不存在该邮箱就提示用户完成注册
+                  else if(response.code === 1) {
+                    layer.msg(response.msg, {icon: 5});
+                    setTimeout(function () {
+                      var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                      parent.layer.close(index);//关闭弹出层
+                    }, 1000);
+                  } else{
+                      layer.msg(response.msg, {icon: 5});
+                  }
+              }
+          })
+
+          return false;
+      });
+
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body th:fragment="foot">
+  <footer class="pt-5 pb-3 footer  footer-dark bg-tertiary">
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-md-4">
+        <div class="pr-lg-5">
+          <h1 class="heading h6 text-uppercase font-weight-700 mb-3"><strong>MIN DE </strong>ENERGY</h1>
+          <p>
+            Mingde Oil & Gas Co., Ltd. is an energy company founded in 2005 and headquartered in Beijing, China.
+            The company's principal activities are the exploration, extraction and sale of oil and natural gas.
+            The company is committed to providing sustainable energy solutions for the global energy market,
+            is a leading technology, environmental protection, global vision and social responsibility of the energy company,
+            to provide sustainable energy solutions for the global energy market, but also committed to achieve its own
+            sustainable development.
+          </p>
+        </div>
+      </div>
+      <div class="col-6 col-md">
+        <h5 class="heading h6 text-uppercase font-weight-700 mb-3">关于我们</h5>
+        <ul class="list-unstyled text-small">
+          <li><a class="text-muted" href="#">集团简介</a></li>
+          <li><a class="text-muted" href="#">组织机构</a></li>
+          <li><a class="text-muted" href="#">主营业务</a></li>
+          <li><a class="text-muted" href="#">企业文化</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md">
+        <h5 class="heading h6 text-uppercase font-weight-700 mb-3">新闻中心</h5>
+        <ul class="list-unstyled text-small">
+          <li><a class="text-muted" th:href="@{/front/toInfor}">集团新闻</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">国资动态</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">高层动态</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">媒体聚焦</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">石油财经</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md">
+        <h5 class="heading h6 text-uppercase font-weight-700 mb-3">相关下载</h5>
+        <ul class="list-unstyled text-small">
+          <li><a class="text-muted" th:href="@{/front/toInfor}">年度报告</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">社会责任报告</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">可持续发展报告</a></li>
+          <li><a class="text-muted" th:href="@{/front/toInfor}">国别报告</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md">
+        <h5 class="heading h6 text-uppercase font-weight-700 mb-3">帮助</h5>
+        <ul class="list-unstyled text-small">
+          <li><a class="text-muted" href="#">人才招聘</a></li>
+          <li><a class="text-muted" href="#">网站地图</a></li>
+          <li><a class="text-muted" th:href="@{/front/toContact}">联系我们</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+    <div class="d-flex align-items-center">
+          <span class="">
+            &copy; 2023 <a href="https://webpixels.io/" class="footer-link" target="_blank">MIN DE ENERGY</a>. &nbsp;All rights reserved.
+          </span>
+      <ul class="nav ml-lg-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" target="_blank"><i class="fab fa-github"></i></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" target="_blank"><i class="fab fa-dribbble"></i></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

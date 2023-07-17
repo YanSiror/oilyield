@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+  <link rel="stylesheet" th:href="@{/assets/lib/font-awesome-4.7.0/css/font-awesome.min.css}" media="all">
+
+  <title>管理员主页</title>
+
+
+    <script type="text/javascript">
+      var paramobj = {};
+      var username,id;
+      window.onload = function () {
+        //此时parameterURL为:name=张三&age=25
+        var parameterURL = location.search.substring(1, location.search.length);
+        //此时paramArr为一个数组:["name=张三","age=25"]
+        var paramArr = parameterURL.split("&");
+        var temp;
+        //定义2个变量接收key，value并存到paramobj中
+        for (i = 0; i < paramArr.length; i++) {
+          temp = paramArr[i].split("=");
+          if (temp.length === 1) {
+            paramobj[temp[0]] = "";
+          }
+          else if(temp.length>1){
+            for (j = 0; j < temp.length; j++) {
+              paramobj[temp[0]] = decodeURIComponent(temp[1]);
+            }
+          }
+        }
+        //此时参数已全部保存至paramobj中,这里显示到div
+        var showStr="";
+
+        var i = 0;
+        for (var a in paramobj) {
+          if(i === 0)
+            username = paramobj[a];
+          else if(i === 1)
+            id = paramobj[a];
+          showStr += (a + ":" + paramobj[a]);
+          i++;
+        }
+        console.log(showStr, username, id)
+        document.getElementById("showname").innerText = username;
+        document.getElementById("header").src = "/admin/getHeader?id=" + id;
+      }
+
+      function goFullscreen() {
+        var isFull = document.fullscreenElement;
+        if(isFull){
+          document.exitFullscreen();
+          document.getElementById("ficon").className ="fa fa-expand";
+        } else {
+          document.documentElement.requestFullscreen();
+          document.getElementById("ficon").className ="fa fa-compress";
+        }
+      }
+
+      function uploadHeader(){
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/admin/toHeader?id='+id,
+          area: ['50%', '60%'],
+          offset: 'auto',
+          id: 'uploadheader' //设定一个id，防止重复弹出
+        });
+      }
+
+      function modUser(){
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/common/toPassCheck?id='+id+"&status=0",
+          area: ['40%', '60%'],
+          offset: 'auto',
+          title: '修改权限校验',
+          id: 'modify' //设定一个id，防止重复弹出
+        });
+      }
+
+      function getMsg(){
+        var msg = "";
+        $.ajax({
+          url:'https://v1.hitokoto.cn',
+          type:'GET',
+          success:
+              function (response) {
+                msg = response.hitokoto;
+                document.getElementById('text').innerHTML = msg;
+                document.getElementById('text').style.display = "";
+                console.log(msg);
+              }
+        })
+        //示范一个公告层
+        layer.open({
+          type: 1
+          ,title: false //不显示标题栏
+          ,closeBtn: false
+          ,area: '300px;'
+          ,shade: 0.8
+          ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+          ,btn: ['返回', '关闭']
+          ,btnAlign: 'c'
+          ,moveType: 1 //拖拽模式，0或者1
+          ,content: $('#content')
+          ,success: function(layero){
+            var btn = layero.find('.layui-layer-btn');
+            btn.find('.layui-layer-btn0').attr({
+              href: '#'
+              ,target: '_blank'
+            });
+          }
+        });
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+      }
+    </script>
+</head>
+
+<div id="content" style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;text-align: center;display: none">
+  <div style="font-weight: 800;margin-bottom: 20px">
+    每日一句
+  </div>
+  <div id="text" style="line-height: 22px; font-weight: 300;"></div>
+</div>
+
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header custom-header">
+      <ul class="layui-nav layui-layout-left">
+          <li class="layui-nav-item slide-sidebar" lay-unselect>
+              <a href="javascript:;" class="icon-font"><i class="ai ai-menufold"></i></a>
+          </li>
+      </ul>
+
+      <!--    //右上角下拉菜单及内容-->
+      <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item mobile layui-hide-xs" lay-unselect>
+          <a href="javascript:;" data-check-screen="full" onclick="goFullscreen()">
+            <i class="fa fa-expand" id="ficon"></i>
+          </a>
+        </li>
+
+        <li class="layui-nav-item">
+          <a onclick="getMsg()">
+            <i class="fa fa-send"></i>
+          </a>
+        </li>
+        <li class="layui-nav-item">
+          <nobr>
+            <a href="javascript:;">
+              <img id="header" class="layui-nav-img" alt="头像" th:src="@{/admin/getHeader(id=${admin.id})}">
+              欢迎您，管理员
+              <b th:text="${admin.username}"></b>
+            </a>
+            <dl class="layui-nav-child">
+                <dd><a th:href="@{/security.html}">切换用户</a></dd>
+                <dd><a onclick="uploadHeader()">上传头像</a></dd>
+                <dd><a th:href="@{/front/toFront}">转到前台</a></dd>
+                <dd><a th:onclick="modUser([[${admin.id}]])">修改密码</a></dd>
+                <dd><a th:href="@{/admin/logout}">退出系统</a></dd>
+            </dl>
+        </li>
+      </ul>
+  </div>
+
+    <!--  左上角名字-->
+    <div class="layui-side custom-admin">
+        <div class="layui-side-scroll">
+
+          <div class="custom-logo">
+            <img th:src="@{/assets/images/logo.png}" alt=""/>
+            <h1>油田产量分析预警系统</h1>
+          </div>
+
+            <ul id="Nav" class="layui-nav layui-nav-tree lay-unselect" >
+              <li class="layui-nav-item">
+                  <a href="javascript:;">
+                      <i class="layui-icon">&#xe66f;</i>
+                      <em>用户信息管理</em>
+                  </a>
+                  <dl class="layui-nav-child">
+                      <dd><a th:href="@{/staff/toList}">用户信息管理</a></dd>
+                  </dl>
+              </li>
+
+              <li class="layui-nav-item">
+                <a href="javascript:;">
+                  <i class="layui-icon">&#xe612;</i>
+                  <em>前台信息管理</em>
+                </a>
+                <dl class="layui-nav-child">
+                  <dd><a th:href="@{/product/toList}">产品信息管理</a></dd>
+                  <dd><a th:href="@{/comment/toList}">留言信息</a></dd>
+                  <dd><a th:href="@{/news/toList}">新闻信息管理</a></dd>
+                </dl>
+              </li>
+
+              <li class="layui-nav-item">
+                <a href="javascript:;">
+                  <i class="fa fa-archive"></i>
+                  <em>单井信息管理</em>
+                </a>
+                <dl class="layui-nav-child">
+                  <dd><a th:href="@{/well/toList}">单井信息管理</a></dd>
+                </dl>
+              </li>
+
+              <li class="layui-nav-item">
+                <a href="javascript:;">
+                  <i class="fa fa-bandcamp"></i>
+                  <em>产量信息管理</em>
+                </a>
+                <dl class="layui-nav-child">
+                  <dd><a th:href="@{/yield/toList}">产量信息管理</a></dd>
+                  <dd><a th:href="@{/yield/listAll}">产量占比查询</a></dd>
+                  <dd><a th:href="@{/yield/listTrend}">产量趋势显示</a></dd>
+                  <dd><a th:href="@{/yield/listAnalyse}">单井产量分析</a></dd>
+                </dl>
+              </li>
+
+              <li class="layui-nav-item">
+                <a href="javascript:;">
+                  <i class="layui-icon">&#xe62c;</i>
+                  <em>产量异常预警</em>
+                </a>
+                <dl class="layui-nav-child">
+                  <dd><a th:href="@{/yield/listWarn}">产量异常预警</a></dd>
+                </dl>
+              </li>
+
+              <li class="layui-nav-item">
+                <a href="javascript:;">
+                  <i class="layui-icon">&#xe66e;</i>
+                  <em>分组产量分析</em>
+                </a>
+                <dl class="layui-nav-child">
+                  <dd><a th:href="@{/yield/listGroup}">分组产量分析</a></dd>
+                </dl>
+              </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <div class="layui-tab app-container" lay-allowClose="true" lay-filter="tabs">
+            <ul id="appTabs" class="layui-tab-title custom-tab"></ul>
+            <div id="appTabPage" class="layui-tab-content"></div>
+        </div>
+    </div>
+
+<!--    <div class="layui-footer">-->
+<!--      <p>© 2023 FWC <a href="" target="_blank">Oilfield production analysis and early warning system</a></p>-->
+<!--    </div>-->
+
+
+    <div class="mobile-mask"></div>
+</div>
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+<script th:src="@{/assets/layui.js}"></script>
+<script>
+  layui.config({
+    base: '/assets/js/' //你存放新模块的目录，注意，不是 layui 的模块目录
+  }).use('home'); //加载入口
+</script>
+<script>
+  layui.use('form', function () {
+    var form = layui.form;
+    form.render('select'); //刷新select选择框渲染
+    //各种基于事件的操作，下面会有进一步介绍
+  });
+
+  layui.use('element', function(){
+    var element = layui.element;
+    //一些事件触发
+    element.on('tab(demo)', function(data){
+      console.log(data);
+    });
+  });
+</script>
+</body>
+</html>

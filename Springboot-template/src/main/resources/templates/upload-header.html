@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/layui.js}"></script>
+  <script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+    <title>上传头像</title>
+    <script>
+        layui.use('form', function () {
+            var form = layui.form;
+            form.render();      //更新全部
+        });
+
+        layui.use('element', function(){
+            var element = layui.element;
+            //一些事件触发
+            element.on('tab(demo)', function(data){
+                console.log(data);
+            });
+        });
+    </script>
+
+    <script>
+        layui.use('form', function(){
+            var form = layui.form;
+
+            form.on('submit(formDemo)', function(data){
+                console.log(data.field.fileName)
+                $.ajax({
+                    url:'/admin/saveHeader',
+                    type:'post',
+                    data : {
+                        id: data.field.id,
+                        filename: data.field.fileName
+                    },
+                    success:function (response) {
+                        if(response.code == '1'){
+                            layer.msg("上传成功", {icon: 6});
+                            setTimeout(function(){
+                                var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                                parent.layer.close(index);//关闭弹出层
+                                window.parent.location.reload();
+                                layer.closeAll();//关闭所有的弹出层
+                            }, 1000);
+                        } else{
+                            layer.msg("添加失败", {icon: 5});
+                        }
+                    }
+                })
+
+                return false;
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+        var paramobj = {};
+        var username,id;
+        window.onload = function () {
+            //此时parameterURL为:name=张三&age=25
+            var parameterURL = location.search.substring(1, location.search.length);
+            //此时paramArr为一个数组:["name=张三","age=25"]
+            var paramArr = parameterURL.split("&");
+            var temp;
+            //定义2个变量接收key，value并存到paramobj中
+            for (i = 0; i < paramArr.length; i++) {
+                temp = paramArr[i].split("=");
+                if (temp.length === 1) {
+                    paramobj[temp[0]] = "";
+                }
+                else if(temp.length>1){
+                    for (j = 0; j < temp.length; j++) {
+                        paramobj[temp[0]] = decodeURIComponent(temp[1]);
+                    }
+                }
+            }
+            //此时参数已全部保存至paramobj中,这里显示到div
+            var showStr="";
+
+            var i = 0;
+            for (var a in paramobj) {
+                if(i === 0)
+                    id = paramobj[a];
+                showStr += (a + ":" + paramobj[a]);
+                i++;
+            }
+            console.log(showStr, id)
+            document.getElementById("id").value = id;
+        }
+    </script>
+</head>
+<body>
+<div class="container" style="width: 100%">
+    <div class="layui-card" style="text-align: center;">
+        <h3><div class="layui-card-header layui-bg-cyan">上传头像</div></h3>
+    </div>
+
+    <form class="layui-form" method="post" action="" style="width: 60%; float:left; margin-left:20% ">
+        <input type="hidden" id="id" name="id" value="" class="layui-input">
+
+        <div class="layui-row layui-col-md6">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend>上传头像</legend>
+            </fieldset>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label" for="fileName">文件名</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="fileName" name="fileName" placeholder="文件名" value="" class="layui-input" readonly>
+                </div>
+                <div class="layui-form-inline">
+                    <button type="button"  class="layui-btn" name="uploadFile" id="upload"><i class="layui-icon"></i>上传头像</button>
+                </div>
+            </div>
+
+            <!-- 折叠面板 -->
+            <div class="layui-form-item layui-collapse" style="width: 400px; margin-left: 55px">
+                <div class="layui-colla-item">
+                    <h2 class="layui-colla-title">展开图片</h2>
+                    <div class="layui-colla-content layui-show">
+                        <img class="layui-upload-img" id="pre_img" style="height: 100%; width: 100%">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="layui-border-black">
+
+            <div class="layui-form-item" style="margin-left: 80px">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<script>
+    layui.use('upload', function(){
+        var upload = layui.upload;
+        //指定允许上传的文件类型
+        upload.render({
+            elem: '#upload'
+            ,url: '/admin/uploadHead' //此处配置你自己的上传接口即可
+            ,accept: 'file' //普通文件
+            ,field: 'uploadFile'
+            ,exts: 'jpg|png'
+            ,bindAction: '#testListAction' //指向一个按钮触发上传
+            ,before: function(obj){
+                obj.preview(function(index, file, result){
+                    $('#pre_img').attr('src', result);
+                    console.log(file)
+                    $('#fileName').val(file.name);  //展示文件名
+                });
+            }
+            ,done: function(res) {
+                //上传成功
+                layer.msg('上传成功,保存在 C:\\headers 文件夹下！', {
+                    icon : 6,
+                    offset : "auto",
+                    time : 2000
+                });//提示框
+            },error: function(res){
+                //上传成功
+                layer.msg('上传成功,保存在 C:\\headers 文件夹下！', {
+                    icon : 6,
+                    offset : "auto",
+                    time : 2000
+                });//提示框
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

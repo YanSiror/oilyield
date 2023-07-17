@@ -1,0 +1,61 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/oilyield?useSSL=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
+    username: root
+    password: yan19991001
+  thymeleaf:
+    cache: false
+    mode: LEGACYHTML5
+  messages:
+    basename: i18n.login
+  mail:
+    username: 1719831051@qq.com
+    password: uottbxykjomldghb
+    host: smtp.qq.com
+    protocol: smtp
+    from: 1719831051@qq.com
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存过期时间
+  elasticsearch:
+    uris: 127.0.0.1:9200
+  rabbitmq:
+    port: 5672
+    host: localhost
+    username: guest
+    password: guest
+    #这个配置是保证提供者确保消息推送到交换机中，不管成不成功，都会回调
+    publisher-confirm-type: correlated
+    #保证交换机能把消息推送到队列中
+    publisher-returns: true
+    virtual-host: /
+    #这个配置是保证消费者会消费消息，手动确认
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000
+        acknowledge-mode: auto
+    template:
+      mandatory: true
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+
+

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>缺陷浏览</title>
+    <!-- Meta tag Keywords -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+    <style>
+      .layui-layout-body {
+        overflow-y: auto;
+      }
+    </style>
+
+
+
+</head>
+<body>
+<div class="layuimini-container">
+  <div class="layuimini-main">
+
+    <fieldset class="table-search-fieldset">
+      <legend>搜索信息</legend>
+      <div style="margin: 10px 10px 10px 10px">
+        <form class="layui-form layui-form-pane" action="">
+          <div class="layui-form-item">
+            <div class="layui-inline">
+              <label class="layui-form-label">单井名称</label>
+              <div class="layui-input-inline">
+                <input type="text" name="name" oninput="suggest(value)" autocomplete="off" list="options" class="layui-input">
+                <datalist id="options">
+                </datalist>
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">起始日期</label>
+              <div class="layui-input-inline">
+                <input type="text" id="date" name="startDate" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">终止日期</label>
+              <div class="layui-input-inline">
+                <input type="text" id="date1" name="endDate" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn">
+                <i class="layui-icon"></i> 搜 索
+              </button>
+            </div>
+          </div>
+<!--        </form>-->
+
+<!--        <form class="layui-form layuimini-form"  action="" style="margin-left: 30px" lay-filter="linechart">-->
+          <div class="layui-form-inline">
+            <label class="layui-form-label">阈值</label>
+            <div class="layui-input-inline">
+              <input type="text" id="limitValue" name="limitValue" class="layui-input">
+            </div>
+            <button  class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="getChart">获取</button>
+          </div>
+        </form>
+      </div>
+    </fieldset>
+
+    <script type="text/html" id="toolbarDemo">
+      <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加 </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除 </button>
+        <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="import"> 导入Excel </button>
+      </div>
+    </script>
+
+    <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter" style="width:2000px;height: 2000px"></table>
+
+    <script type="text/html" id="currentTableBar">
+      <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+      <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+    </script>
+
+  </div>
+</div>
+
+
+<script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+<script th:src="@{/assets/layui.js}"></script>
+<script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+
+
+<script id="statusShow">
+  // <div th:if="${{{=d.status}} == 0}">
+  //   <span class="layui-badge">赤</span>
+  // </div>
+  // <div th:if="${{{=d.status}} == 1}">
+  //   <span class="layui-badge layui-bg-green">绿</span>
+  // </div>
+
+  // 假设dataObj是由表格返回的数据对象
+  let status = '{{= d.status}}';
+  // 根据状态属性判断执行页面操作
+  if (status === 0) {
+  // 显示红色标签
+  document.getElementById("statusShow").innerHTML = '<div><span class="layui-badge">赤</span></div>';
+  } else if (status === 1) {
+  // 显示绿色标签
+  document.getElementById("statusShow").innerHTML = '<div><span class="layui-badge layui-bg-green">绿</span></div>';
+  }
+</script>
+
+<script>
+  //节流技术 - 防止多次重复请求, 限制请求次数
+  var timeoutId;
+  function suggest(keyword){
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(function () {
+      $.ajax({
+        url: '/well/suggest',
+        type: 'GET',
+        data: {
+          keyword: keyword
+        },
+        success:
+            function (response) {
+              var options = "";
+              $.each(response, function (index, value) {
+                for (var i = 0; i < value.length; i++) {
+                  options += "<option value=\"" + value[i] + "\">";
+                }
+              });
+              $('#options').html(options);
+            }
+      })
+    }, 500);
+  }
+
+  layui.use(['form', 'table'], function () {
+    var $ = layui.jquery,
+        form = layui.form,
+        table = layui.table,
+        laydate = layui.laydate;
+
+    //日期
+    laydate.render({
+      elem: '#date' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#date'
+    });
+
+    //日期
+    laydate.render({
+      elem: '#date1' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#date1'
+    });
+
+    table.render({
+      elem: '#currentTableId',
+      url: '/yield/list',
+      toolbar: '#toolbarDemo',
+      even: true,
+      defaultToolbar: [
+            'filter', 'exports', 'print', {
+          title: '提示',
+          layEvent: 'LAYTABLE_TIPS',
+          icon: 'layui-icon-tips'
+        }
+      ],
+      cols: [
+        [
+          {type: "checkbox", width: 50},
+          {field: 'id', width: 80, title: 'ID', sort: true},
+          {field: 'wid', width: 80, title: '井组号'},
+          {field: 'wname', width: 100, title: '单井名称', sort: true},
+          {field: 'liquid', width: 60, title: '产液'},
+          {field: 'oil', title: '产油', minWidth: 60},
+          {field: 'water', minWidth: 60, title: '产水', sort: true},
+          {field: 'gas', minWidth: 60, title: '产气', sort: true},
+          {field: 'rate', minWidth: 60, title: '含水率', sort: true},
+          {field: 'time', minWidth: 80, title: '生产日期', sort: true, templet: function (d) {
+              return layui.util.toDateString(d.time, 'yyyy-MM-dd');
+            }},
+          {field: 'ptime', minWidth: 50, title: '生产时间', sort: true},
+          {
+            fixed: 'right', field: 'status', minWidth: 50, title: '异常状态', sort: false, templet: function (d) {
+              if (d.status === 0) {
+                return ' <span class="layui-badge">异常</span>';
+              } else if (d.status === 1) {
+                return '<span class="layui-badge layui-bg-green">正常</span>';
+              }
+            }
+          },
+          {title: '操作', minWidth: 100, toolbar: '#currentTableBar', align: "center"}
+        ]
+      ],
+      limits: [5,10, 15, 20, 25, 50, 100],
+      limit: 10,
+      page: true,
+      skin: 'line'
+    });
+
+    // 监听搜索操作
+    form.on('submit(getChart)', function (data) {
+      layer.msg(JSON.stringify(data.field));//表格数据序列化
+      var formData = data.field;
+      var limitValue = formData.limitValue,
+          name = formData.name,
+          startDate = formData.startDate,
+          endDate = formData.endDate;
+      console.log(formData);
+      console.log(limitValue);
+      //数据表格重载
+      table.reload('currentTableId', {
+        page: {
+          curr: 1 //重新从第 1 页开始
+        }
+        , where: {//这里传参  向后台
+          name: name,
+          startDate: startDate,
+          endDate: endDate,
+          limitValue: limitValue,
+        }
+        , url: '/yield/listLimit'//后台做模糊搜索接口路径
+        , method: 'post'
+      });
+      return false;//false：阻止表单跳转  true：表单跳转
+    });
+
+    // 监听搜索操作
+    form.on('submit(data-search-btn)', function (data) {
+      layer.msg(JSON.stringify(data.field));//表格数据序列化
+      var formData = data.field;
+      console.log(formData);
+      var name = formData.name,
+          startDate = formData.startDate,
+          endDate = formData.endDate;
+      //数据表格重载
+      table.reload('currentTableId', {
+        page: {
+          curr: 1 //重新从第 1 页开始
+        }
+        , where: {//这里传参  向后台
+          name: name,
+          startDate: startDate,
+          endDate: endDate
+        }
+        , url: '/yield/search'//后台做模糊搜索接口路径
+        , method: 'post'
+      });
+      return false;//false：阻止表单跳转  true：表单跳转
+    });
+
+    /**
+     * toolbar监听事件
+     */
+    table.on('toolbar(currentTableFilter)', function (obj) {
+      if (obj.event === 'add') {  // 监听添加操作
+        var index = layer.open({
+          title: '添加用户',
+          type: 2,
+          shade: 0.2,
+          maxmin:true,
+          shadeClose: true,
+          area: ['100%', '100%'],
+          content: '/yield/toAdd',
+        });
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+      }
+      else if (obj.event === 'import') {  // 监听添加操作
+        var index = layer.open({
+          title: '导入Excel',
+          type: 2,
+          shade: 0.2,
+          maxmin:true,
+          shadeClose: true,
+          area: ['100%', '100%'],
+          content: '/yield/toImport',
+        });
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+      }
+      else if (obj.event === 'delete') {  // 监听删除操作
+        var checkStatus = table.checkStatus('currentTableId')
+            , data = checkStatus.data;
+        layer.alert(JSON.stringify(data));
+
+        var ids = "";
+        for (var x in data) {
+          ids += data[x].id + ",";
+        }
+
+        layer.confirm('真的删除所选行么', function (index) {
+          $.ajax({
+            url:'/yield/deleteSelected',
+            type:'GET',
+            data:{
+              id: ids
+            },
+            success:
+                function (response) {
+                  if(response.msg === "1"){
+                    layer.msg("删除成功", {icon: 6});
+                    setTimeout(function(){
+                      layui.table.reload('currentTableId');
+                    }, 1000);
+                  } else{
+                    layer.msg("删除失败", {icon: 5});
+                  }
+                }
+          })
+          obj.del();
+        });
+      }
+      //提示事件 LAYTABLE_TIPS
+      else if (obj.event === 'LAYTABLE_TIPS') {  // 监听添加操作
+        //示范一个公告层
+        layer.open({
+          type: 1
+          ,title: false //不显示标题栏
+          ,closeBtn: false
+          ,area: '300px;'
+          ,shade: 0.8
+          ,id: 'LAY_layuipro' //设定一个id，防止重复弹出
+          ,btn: ['跳转测试', '关闭']
+          ,btnAlign: 'c'
+          ,moveType: 1 //拖拽模式，0或者1
+          ,content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">author: VOF</div>'
+          ,success: function(layero){
+            var btn = layero.find('.layui-layer-btn');
+            btn.find('.layui-layer-btn0').attr({
+              href: '${pageContext.request.contextPath}/pages/100.jsp'
+              ,target: '_blank'
+            });
+          }
+        });
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+      }
+    });
+
+    //监听表格复选框选择
+    table.on('checkbox(currentTableFilter)', function (obj) {
+      console.log(obj)
+    });
+
+    table.on('tool(currentTableFilter)', function (obj) {
+      var data = obj.data;
+      console.log(data)
+      if (obj.event === 'edit') {
+        form.render()
+        var index = layer.open({
+          title: '编辑用户',
+          type: 2,
+          shade: 0.2,
+          maxmin: true,
+          shadeClose: true,
+          area: ['100%', '100%'],
+          content: '/yield/loadData/' + data.id,
+          success: function (obj) {
+            var data = obj.data;
+          }
+        })
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+        return false;
+      }
+      else if (obj.event === 'delete') {
+        layer.confirm('真的删除行么', function (index) {
+          $.ajax({
+            url:'/yield/delete',
+            type:'GET',
+            data:{
+              id: data.id
+            },
+            success:
+                function (response) {
+                  if(response.msg == "1"){
+                    layer.msg("删除成功", {icon: 6});
+                    setTimeout(function(){
+                      layui.table.reloadData('currentTableId');
+                    }, 1000);
+                  } else{
+                    layer.msg("删除失败", {icon: 5});
+                  }
+                }
+          })
+          obj.del();
+        });
+      }
+    });
+
+  });
+</script>
+</body>
+
+</html>

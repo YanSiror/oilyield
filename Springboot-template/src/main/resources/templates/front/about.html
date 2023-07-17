@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Probably the most complete UI kit out there. Multiple functionalities and controls added,  extended color palette and beautiful typography, designed as its own extended version of Bootstrap at  the highest level of quality.                             ">
+    <meta name="author" content="Webpixels">
+    <title>关于</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link th:href="@{/assets/css/theme.css}" rel="stylesheet">
+    <link th:href="@{/assets/css/demo.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <script>
+      function modUser(token){
+        var tokenInput = document.getElementsByName('token')[0];
+        var token = tokenInput.value;
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/common/toPassCheck?id='+token+"&status=2",
+          area: ['40%', '60%'],
+          offset: 'auto',
+          title: '修改权限校验',
+          id: 'modify' //设定一个id，防止重复弹出
+        });
+      }
+
+      function seeUser(id){
+        var tokenInput = document.getElementsByName('token')[0];
+        var token = tokenInput.value;
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/user/seeData/'+token,
+          area: ['30%', '60%'],
+          offset: 'auto',
+          id: 'modify' //设定一个id，防止重复弹出
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-transparent navbar-dark bg-dark py-4">
+      <div class="container">
+        <div th:replace="../templates/front/public/header :: title"></div>
+
+        <button class="navbar-toggler" type="button" data-action="offcanvas-open" data-target="#navbar_main" aria-controls="navbar_main" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse offcanvas-collapse" id="navbar_main">
+          <ul class="navbar-nav ml-auto align-items-lg-center">
+            <div th:replace="../templates/front/public/header :: Navigationbar"></div>
+
+            <div class="dropdown-divider d-lg-none my-4"></div>
+            <div th:if="${not map.containsKey('token')}">
+              <!-- 当exampleBool为false时，该元素将被渲染 -->
+              <li class="nav-item">
+                <a th:href="@{/front/toLogin/}" class="btn btn-sm bg-white d-none d-lg-inline-flex">登录</a>
+              </li>
+            </div>
+            <div th:if="${map.containsKey('token')}">
+              <!-- 当exampleBool为true时，该元素将被渲染 -->
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbar_main_dropdown_2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  欢迎您, 用户&nbsp;<b th:text="${map['username']}"></b>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
+                  <input th:value="${map.get('token')}" name="token" hidden>
+                  <a class="dropdown-item" th:onclick="seeUser()">查看个人信息</a>
+                  <a class="dropdown-item" th:onclick="modUser()">修改个人信息</a>
+                  <a class="dropdown-item" th:href="@{/front/changeUser/}">切换登录</a>
+                </div>
+              </li>
+            </div>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <main class="main">
+      <section class="spotlight parallax bg-cover bg-size--cover" data-spotlight="fullscreen" style="background-image: url('../assets/images/backgrounds/img-4.jpg')">
+        <span class="mask bg-tertiary alpha-7"></span>
+        <div class="spotlight-holder py-lg pt-lg-xl">
+          <div class="container d-flex align-items-center no-padding">
+            <div class="col">
+              <div class="row cols-xs-space align-items-center text-center text-md-left justify-content-center">
+                <div class="col-lg-7">
+                  <div class="text-center mt-5">
+                    <img src="../assets/images/brand/icon.png" style="width: 200px;" class="img-fluid animated" data-animation-in="jackInTheBox" data-animation-delay="1000">
+                    <h2 class="heading display-4 font-weight-400 text-white mt-5 animated" data-animation-in="fadeInUp" data-animation-delay="2000">
+                      您好, 很高兴遇见您!
+                    </h2>
+                    <h1 class="heading h1 text-white">
+
+                    </h1>
+                    <p class="lead lh-180 text-white mt-3">
+                      明德油气责任有限公司是一家成立于2005年的能源公司，总部位于中国北京。公司的主要业务是石油和天然气的勘探、开采和销售。公司致力于为全球能源市场提供可持续发展的能源解决方案，以满足不断增长的能源需求和环保要求。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="slice-lg">
+        <div class="container">
+          <div class="row align-items-center cols-xs-space cols-sm-space cols-md-space">
+            <div class="col-lg-12 order-lg-1">
+              <div class="row-wrapper">
+                <div class="row">
+                  <div class="col">
+                    <div class="d-flex align-items-start">
+                      <div class="icon icon-lg">
+                        <i class="fab fa-twitter"></i>
+                      </div>
+                      <div class="icon-text">
+                        <h2 class="heading text-black h1 strong-600">
+                          公司简介
+                        </h2>
+                        <p class="lead">
+                          明德油气责任有限公司是一家成立于2005年的能源公司，总部位于中国北京。公司的主要业务是石油和天然气的勘探、开采和销售。<br>
+                          公司致力于为全球能源市场提供可持续发展的能源解决方案，以满足不断增长的能源需求和环保要求。
+                        </p>
+                        <p class="lead">
+                          公司在在华北地区、长江沿岸及东南沿海省份建有多个石油储罐场和加注站, 拥有先进的采油平台、千里油气管道和先进的石油加工<br>
+                          设备。公司注重环保和安全生产,构建了完善的风险预控体系和应急预案, 还与国内外多家知名石油设备供应商建立了长期合作关系,不断更新更换设备来提高生产效率。
+                        </p>
+                        <p class="lead">
+                          与此同时, 还与名牌高校建立了多年的深度合作,不断吸纳高素质的石油人才来丰富和创新公司的经营管理理念。<br>
+                          未来,公司将继续加大对科研投入,积极推进数字化、智能化进程,不断优化产品及服务,致力于成为国内一流的专业石油销售商和能源供应商。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="container-fluid px-0">
+          <div class="card-group flex-column flex-md-row">
+            <div class="card bg-primary text-white px-4 px-lg-5 py-5 rounded-0 border-0 mb-0">
+              <div class="card-body">
+                <h1 class="heading h2 text-white">历史优势</h1>
+                <p class="mt-4">
+                  明德油气责任有限公司在成立初期就明确了公司的使命和目标，始终秉承着诚信、创新、责任、共赢的核心价值观，通过多年的发展和实践，形成了自己独特的企业文化和品牌形象。公司在勘探、开采、销售等方面积累了丰富的经验和技术，拥有一支经验丰富、技术过硬的团队，为公司的可持续发展打下了坚实的基础。
+                </p>
+              </div>
+            </div>
+            <div class="card bg-secondary px-4 px-lg-5 py-5 rounded-0 border-0 mb-0">
+              <div class="card-body">
+                <h1 class="heading h2">技术优势</h1>
+                <p class="mt-4">
+                  明德油气责任有限公司在技术方面具有显著优势，公司拥有一批高素质的科研团队和先进的勘探、开采技术。公司在油气勘探领域不断创新，引入了一系列先进的勘探技术和设备，提高了勘探效率和精度；在油气开采方面，公司采用了先进的采油技术，提高了油气开采效率和利用率。同时，公司积极推广清洁能源技术，加强对新能源的研发和应用，为可持续发展做出了积极贡献。
+                </p>
+              </div>
+            </div>
+            <div class="card bg-tertiary text-white px-4 px-lg-5 py-5 rounded-0 border-0 mb-0">
+              <div class="card-body">
+                <h1 class="heading h2 text-white">市场优势</h1>
+                <p class="mt-4">
+                  明德油气责任有限公司在市场方面具有显著优势。公司的业务已经覆盖全球多个国家和地区，拥有广泛的销售网络和客户群体。公司的产品和服务质量得到了客户和市场的高度认可，拥有良好的品牌声誉和美誉度。公司在市场营销方面也拥有一支高效专业的团队，能够根据市场需求和趋势，灵活调整营销策略，提高市场占有率和竞争力。同时，公司积极参与公益事业和慈善活动，树立了良好的社会形象和企业形象，得到了社会各界的广泛关注和支持。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slice slice-lg">
+      <div class="container">
+        <div class="mb-5 text-center">
+          <h3 class="heading h2">合作伙伴</h3>
+          <div class="fluid-paragraph text-center">
+            <p class="lead mb-0">Cooperative partner</p>
+          </div>
+        </div>
+        <div class="text-center mb-5">
+          <div class="btn-group" role="group" aria-label="Basic example">
+            <button type="button" class="btn btn-secondary active">医院</button>
+            <button type="button" class="btn btn-secondary ">院校</button>
+          </div>
+        </div>
+<!--        <div class="card-deck mb-3">-->
+<!--          <img src="../assets/images/prv/partner.png" class="card-img-top">-->
+<!--        </div>-->
+      </div>
+    </section>
+  </main>
+
+    <div th:replace="../templates/front/public/footer :: foot"></div>
+
+    <script th:src="@{/assets/layui.js}"></script>
+
+    <!-- Core -->
+    <script th:src="@{/assets/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/assets/vendor/popper/popper.min.js}"></script>
+    <script th:src="@{/assets/js/bootstrap/bootstrap.min.js}"></script>
+    <!-- FontAwesome 5 -->
+    <script th:src="@{/assets/vendor/fontawesome/js/fontawesome-all.min.js}" defer></script>
+    <!-- Page plugins -->
+    <script th:src="@{/assets/vendor/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <script th:src="@{/assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.min.js}"></script>
+    <script th:src="@{/assets/vendor/input-mask/input-mask.min.js}"></script>
+    <script th:src="@{/assets/vendor/nouislider/js/nouislider.min.js}"></script>
+    <script th:src="@{/assets/vendor/textarea-autosize/textarea-autosize.min.js}"></script>
+    <!-- Theme JS -->
+    <script th:src="@{/assets/js/theme.js}"></script>
+</body>
+</html>

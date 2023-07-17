@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Probably the most complete UI kit out there. Multiple functionalities and controls added,  extended color palette and beautiful typography, designed as its own extended version of Bootstrap at  the highest level of quality.                             ">
+    <meta name="author" content="Webpixels">
+    <title>首页</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link th:href="@{/assets/css/theme.css}" rel="stylesheet">
+    <link th:href="@{/assets/css/demo.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <script th:src="@{/assets/layui.js}"></script>
+
+    <script>
+      function modUser(token){
+        var tokenInput = document.getElementsByName('token')[0];
+        var token = tokenInput.value;
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/common/toPassCheck?id='+token+"&status=2",
+          area: ['40%', '60%'],
+          offset: 'auto',
+          title: '修改权限校验',
+          id: 'modify' //设定一个id，防止重复弹出
+        });
+      }
+
+      function seeUser(id){
+        var tokenInput = document.getElementsByName('token')[0];
+        var token = tokenInput.value;
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/user/seeData/'+token,
+          area: ['30%', '60%'],
+          offset: 'auto',
+          id: 'modify' //设定一个id，防止重复弹出
+        });
+      }
+    </script>
+
+    <!-- 使用JavaScript代码初始化laypage组件，并为其绑定事件 -->
+    <script>
+      // 初始化laypage组件
+      layui.use(['laypage'], function() {
+        var laypage = layui.laypage;
+        // 执行分页导航栏的渲染
+        renderPagination();
+        // 定义分页导航栏的渲染函数
+        function renderPagination() {
+          // 向后端发送Ajax请求获取总记录数
+          $.ajax({
+            url: "/product/list_front",
+            type: "GET",
+            data: {page: 1, limit: 6}, // 此处传递参数的值无实际意义，仅用于获取总记录数
+            dataType: "json",
+            curr: 1,
+            success: function(data) {
+              // 计算总页数
+              var totalCount = data.count;
+              var pageSize = 6; // 分页大小，可根据实际情况自行调整
+              var totalPages = Math.ceil(totalCount / pageSize);
+
+              // 渲染分页导航栏
+              laypage.render({
+                elem: 'pagination',
+                count: totalCount, // 总记录数
+                limit: pageSize, // 分页大小
+                theme: '#1E9FFF', // 主题颜色
+                layout: ['prev', 'page', 'next'],
+                jump: function(obj, first) { // 当分页导航栏发生变化时调用
+                    // 向后端发送Ajax请求获取指定页码的数据
+                    $.ajax({
+                      url: "/product/list_front",
+                      type: "GET",
+                      data: {page: obj.curr, limit: pageSize},
+                      dataType: "json",
+                      success: function(data) {
+                        // 渲染产品列表
+                        renderProductList(data.data);
+                      }
+                    });
+                  }
+              });
+            }
+          });
+        }
+
+        // 定义渲染产品列表的函数
+        function renderProductList(products) {
+          var html = '';
+          //console.log('context: ', contextPath)
+          for(var i = 0; i < products.length; i++) {
+            var product = products[i];
+            var productId = product.id;
+            var url = "/uploads/products/" + product.img;
+            console.log(url, productId, product)
+            html += '<div class="col-sm-4">';
+            html +=     '<a>';
+            html +=         '<div class="typeface-entry">';
+            html +=             '<span class="badge badge-md typeface-badge badge-pill bg-primary text-white">HOT</span>';
+            html +=                 '<img id="header" alt="产品图像" style="width: 100%;height:100%" src="' + url + '">';
+            html +=             '<h3 class="heading display-5 font-weight-400 text-dark"><b>' + product.name + '</b></h3>';
+            html +=             '<p><b>' + product.infor + '</b></p>';
+            html +=         '</div>';
+            html +=     '</a>';
+            html += '</div>';
+          }
+          $('#productList').html(html);
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-transparent navbar-dark bg-dark py-4">
+      <div class="container">
+        <div th:replace="../templates/front/public/header :: title"></div>
+
+        <button class="navbar-toggler" type="button" data-action="offcanvas-open" data-target="#navbar_main" aria-controls="navbar_main" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse offcanvas-collapse" id="navbar_main">
+          <ul class="navbar-nav ml-auto align-items-lg-center">
+            <div th:replace="../templates/front/public/header :: Navigationbar"></div>
+
+            <div th:if="${not map.containsKey('token')}">
+              <!-- 当exampleBool为false时，该元素将被渲染 -->
+              <li class="nav-item">
+                <a th:href="@{/front/toLogin/}" class="btn btn-sm bg-white d-none d-lg-inline-flex">登录</a>
+              </li>
+            </div>
+            <div th:if="${map.containsKey('token')}">
+              <!-- 当exampleBool为true时，该元素将被渲染 -->
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbar_main_dropdown_2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  欢迎您, 用户&nbsp;<b th:text="${map['username']}"></b>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
+                  <input th:value="${map.get('token')}" name="token" hidden>
+                  <a class="dropdown-item" th:onclick="seeUser()">查看个人信息</a>
+                  <a class="dropdown-item" th:onclick="modUser()">修改个人信息</a>
+                  <a class="dropdown-item" th:href="@{/front/changeUser/}">切换登录</a>
+                </div>
+              </li>
+            </div>
+
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="main">
+      <section class="spotlight parallax bg-cover bg-size--cover" data-spotlight="fullscreen" style="background-image: url('../assets/images/backgrounds/img-1.jpg')">
+        <span class="mask bg-primary alpha-7"></span>
+        <div class="spotlight-holder py-lg pt-lg-xl">
+          <div class="container d-flex align-items-center no-padding">
+            <div class="col">
+              <div class="row cols-xs-space align-items-center text-center text-md-left justify-content-center">
+                <div class="col-7">
+                  <div class="text-center mt-5">
+                    <img src="../assets/images/brand/icon.png" style="width: 200px;" class="img-fluid animated" data-animation-in="jackInTheBox" data-animation-delay="1000">
+                    <h2 class="heading display-4 font-weight-400 text-white mt-5 animated" data-animation-in="fadeInUp" data-animation-delay="2000">
+                      <span class="font-weight-700">MIN DE</span> ENERGY
+                    </h2>
+                    <p class="lead text-white mt-3 lh-180 c-white animated" data-animation-in="fadeInUp"
+                       data-animation-delay="2500">
+                      明德油气责任有限公司是一家成立于2005年的能源公司，总部位于中国北京。公司的主要业务是石油和天然气的勘探、开采和销售。公司致力于为全球能源市场提供可持续发展的能源解决方案，以满足不断增长的能源需求和环保要求。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slice slice-lg" data-delimiter="1">
+        <div class="container">
+          <div class="mb-md text-center">
+            <h2 class="heading h2"> <i class="fas fa-heart text-danger px-2"></i> 油气技术自动化采集服务商</h2>
+            <div class="fluid-paragraph text-center mt-4">
+              <p class="lead lh-200">
+                公司秉承质量、服务至上的宗旨，按照客户需求精准定制、科学管理、严格生产
+              </p>
+            </div>
+          </div>
+          <div class="row cols-xs-space cols-sm-space cols-md-space">
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/prv/team-1.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h4 mb-1">
+                    <span class="d-block">技术领先</span>
+                    <small class="text-muted">Technology leadership</small>
+                  </h4>
+                  <p class="mt-1">公司拥有一支高素质的科研团队和先进的勘探、开采技术，能够快速、高效地开采油气资源，同时也保护环境和生态。</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/prv/team-2.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h4 mb-1">
+                    <span class="d-block">环保理念</span>
+                    <small class="text-muted">Environmental protection concept</small>
+                  </h4>
+                  <p class="mt-2">公司的经营理念是“以环保为先，以质量为本”，在开采过程中注重环境保护，积极推广清洁能源，努力实现可持续发展。</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/prv/team-3.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h5 mb-1">
+                    <span class="d-block">全球市场</span>
+                    <small class="text-muted">Global market</small>
+                  </h4>
+                  <p class="mt-2">公司的业务已经覆盖全球多个国家和地区，拥有广泛的销售网络和客户群体，能够为全球能源市场提供有竞争力的产品和服务。</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/prv/team-4.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h5 mb-1">
+                    <span class="d-block">社会责任</span>
+                    <small class="text-muted">Social responsibility</small>
+                  </h4>
+                  <p class="mt-2">公司注重社会责任，积极参与公益事业和慈善活动，为社会做出贡献。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slice slice-lg" data-delimiter="1">
+        <div class="container">
+          <div class="mb-md text-center">
+            <h2 class="heading h2"> <i class="fa-solid fa-stethoscope"></i> 应用案例</h2>
+            <div class="fluid-paragraph text-center mt-4">
+              <p class="lead lh-200">
+                为您的石油业务保驾护航
+              </p>
+            </div>
+          </div>
+          <div class="row cols-xs-space cols-sm-space cols-md-space">
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/application/1.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h4 mb-1">
+                    <span class="d-block">海上石油采集平台</span>
+                  </h4>
+                  <p class="mt-1">全球首例带有锚定结构的球扩式TAVR手术</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/application/2.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h4 mb-1">
+                    <span class="d-block">自动化石油采集井</span>
+                  </h4>
+                  <p class="mt-2">“杨”帆远航西京结构手术播</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/application/3.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h4 mb-1">
+                    <span class="d-block">全自动石油采集平台</span>
+                  </h4>
+                  <p class="mt-2">全国首次基于3D打印模型的先天性心脏病外科模拟培训</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-3">
+              <div class="card">
+                <img src="../assets/images/application/4.jpg" class="card-img-top">
+                <div class="card-body text-center">
+                  <h4 class="heading h4 mb-1">
+                    <span class="d-block">油气采集信息化服务平台</span>
+                  </h4>
+                  <p class="mt-2">全国首例3D打印辅助超声引导下经皮心肌室间隔射频消融术</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="slice slice-lg">
+        <div class="container">
+          <div class="mb-md text-center">
+            <h2 class="heading h2"> <i class="fas fa-heart text-danger px-2"></i> 产品信息</h2>
+            <div class="fluid-paragraph text-center mt-4">
+              <p class="lead lh-180">
+                3D个性化精准打印 高质量模型
+              </p>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="col-lg-12">
+              <!-- 产品列表 -->
+              <div id="productList" class="col-lg-12 row typeface-palette cols-xs-space cols-sm-space cols-md-space">
+                <!-- 根据后端返回的数据动态渲染产品列表 -->
+              </div>
+              <!-- 分页导航栏 -->
+              <div id="pagination" class="layui-laypage"></div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="slice slice-lg bg-tertiary bg-cover bg-size--contain" style="background-image: url('../assets/images/backgrounds/img-1.png'); background-position: center 10%;">
+        <span class="mask bg-primary alpha-7"></span>
+        <div class="container text-center">
+          <div class="row cols-xs-space cols-sm-space cols-md-space">
+            <div class="col-12">
+              <h2 class="heading text-white h1 strong-600">
+                公司简介
+              </h2>
+              <div class="row justify-content-left mt-4" >
+                <div class="col-lg-9" style="margin: 0 auto">
+                  <p class="lead text-white">
+                    明德油气责任有限公司是一家成立于2005年的能源公司，总部位于中国北京。公司的主要业务是石油和天然气的勘探、开采和销售。
+                    公司致力于为全球能源市场提供可持续发展的能源解决方案，以满足不断增长的能源需求和环保要求。
+                  </p>
+                  <p class="lead text-white">
+                    公司在在华北地区、长江沿岸及东南沿海省份建有多个石油储罐场和加注站, 拥有先进的采油平台、千里油气管道和先进的石油加工
+                    设备。公司注重环保和安全生产,构建了完善的风险预控体系和应急预案, 还与国内外多家知名石油设备供应商建立了长期合作关系,不断更新更换设备来提高生产效率。
+                  </p>
+                  <p class="lead text-white">
+                    与此同时, 还与名牌高校建立了多年的深度合作,不断吸纳高素质的石油人才来丰富和创新公司的经营管理理念。
+                    未来,公司将继续加大对科研投入,积极推进数字化、智能化进程,不断优化产品及服务,致力于成为国内一流的专业石油销售商和能源供应商。
+                  </p>
+
+<!--                  <div class="btn-container mt-5">-->
+<!--                    <a href="http://makemed3d.com/" class="btn btn-lg bg-white px-4">-->
+<!--                      GET MORE-->
+<!--                    </a>-->
+<!--                  </div>-->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+    <div th:replace="../templates/front/public/footer :: foot"></div>
+
+    <!-- Core -->
+    <script th:src="@{/assets/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/assets/vendor/popper/popper.min.js}"></script>
+    <script th:src="@{/assets/js/bootstrap/bootstrap.min.js}"></script>
+    <!-- FontAwesome 5 -->
+    <script th:src="@{/assets/vendor/fontawesome/js/fontawesome-all.min.js}" defer></script>
+    <!-- Page plugins -->
+    <script th:src="@{/assets/vendor/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <script th:src="@{/assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.min.js}"></script>
+    <script th:src="@{/assets/vendor/input-mask/input-mask.min.js}"></script>
+    <script th:src="@{/assets/vendor/nouislider/js/nouislider.min.js}"></script>
+    <script th:src="@{/assets/vendor/textarea-autosize/textarea-autosize.min.js}"></script>
+    <!-- Theme JS -->
+    <script th:src="@{/assets/js/theme.js}"></script>
+  </body>
+</html>

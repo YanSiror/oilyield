@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/js/echarts.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/layui.js}"></script>
+  <script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+  <title>上传Excel</title>
+</head>
+<body>
+<div class="container" style="width: 100%">
+  <div class="layui-card" style="text-align: center;">
+      <h3><div class="layui-card-header layui-bg-cyan">油井产量分析趋势图</div></h3>
+  </div>
+
+  <form class="layui-form layuimini-form"  action="" style="margin-left: 30px" lay-filter="editForm">
+    <div class="layui-form-item">
+      <label class="layui-form-label required">单井名称</label>
+      <div class="layui-input-inline">
+        <select name="name" lay-verify="required">
+          <option th:each="well:${wells}"
+                  th:value="${well.name}" th:text="${well.name}">
+          </option>
+        </select>
+      </div>
+      <label class="layui-form-label required">生产日期</label>
+      <div class="layui-input-inline">
+          <input type="text" id="date" name="time" class="layui-input">
+      </div>
+      <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="saveBtn">获取</button>
+    </div>
+  </form>
+
+  <div class="layui-row layui-col-space14" style="margin-top: 40px;">
+    <div class="layui-col-md6 layui-col-md-offset1" id="first" style="width:80%;height: 650px;"></div>
+  </div>
+</div>
+
+
+<script>
+  xdata = ['产液', '产油', '产水', '产气']
+  ydata = /*[[${ydata}]]*/ []
+  // let str = "";
+  // for (var i = 0; i < xdata.length; i++) {
+  //    str += '{value: ' + ydata[i] + ",name: \'"+xdata[i]+"\'},\n";
+  // }
+  //  console.log(str)
+
+  let data = [];    // 新增一个数组变量
+  for (var i = 0; i < xdata.length; i++) {
+    data.push({value: ydata[i], name: xdata[i]});    // 向数组中添加数据项
+  }
+  console.log(data);
+
+  var myChart = echarts.init(document.getElementById('first'));
+  option = {
+    title: {
+      text: '油井产量比重图',
+      subtext: 'Real Data',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b} : {c} ({d}%)'
+    },
+    legend: {
+      top: 'bottom'
+    },
+    toolbox: {
+      show: true,
+      feature: {
+        mark: { show: true },
+        dataView: { show: true, readOnly: false },
+        restore: { show: true },
+        saveAsImage: { show: true }
+      }
+    },
+    series: [
+      {
+        name: '油井产量比重图',
+        type: 'pie',
+        radius: [50, 250],
+        center: ['50%', '50%'],
+        roseType: 'area',
+        itemStyle: {
+          borderRadius: 8
+        },
+        label: {
+          show: false
+        },
+        emphasis: {
+          label: {
+            show: true
+          }
+        },
+        data: data
+      }
+    ]
+  };
+  myChart.setOption(option);
+
+  layui.use(['form'], function () {
+    var form = layui.form,
+        layer = layui.layer,
+        laydate = layui.laydate,
+        $ = layui.$;
+    form.render(); //更新全部
+    form.render('select'); //刷新select选择框渲染
+
+    //日期
+    laydate.render({
+      elem: '#date' //指定元素
+      ,type: 'datetime'
+      ,format: 'yyyy-MM-dd HH:mm:ss',
+      value: new Date()
+    });
+    laydate.render({
+      elem: '#date1'
+    });
+
+
+    //监听提交
+    form.on('submit(saveBtn)', function (data) {
+      console.log(data.field)
+      $.ajax({
+        url:'/yield/showPie',
+        type:'post',
+        data :{
+          name: data.field.name,
+          time: data.field.time
+        },
+        success:function (response) {
+          if (response.code === 0) {
+            layer.msg("获取成功", {icon: 6});
+          } else if(response.code === 1){
+            layer.msg("数据不存在", {icon: 5});
+          }
+          setTimeout(1000);
+          console.log(response)
+
+          let datas = [];    // 新增一个数组变量
+          xdata = ['产液', '产油', '产水', '产气']
+          ydata = response.ydata;
+          for (var i = 0; i < ydata.length; i++) {
+            datas.push({value: ydata[i], name: xdata[i]});    // 向数组中添加数据项
+          }
+          console.log(datas);
+          // 更新数据
+          option.series[0].data = datas;
+          // 重置
+          myChart.clear();
+          // 重新渲染
+          myChart.setOption(option);
+        }
+      })
+      return false;
+    });
+  });
+
+</script>
+
+</body>
+</html>

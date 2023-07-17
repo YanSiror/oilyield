@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Probably the most complete UI kit out there. Multiple functionalities and controls added,  extended color palette and beautiful typography, designed as its own extended version of Bootstrap at  the highest level of quality.                             ">
+  <meta name="author" content="Webpixels">
+  <title>联系我们</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
+  <!-- Theme CSS -->
+  <link th:href="@{/assets/css/theme.css}" rel="stylesheet">
+  <link th:href="@{/assets/css/demo.css}" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <script th:src="@{/assets/layui.js}"></script>
+  <script>
+    function modUser(token){
+      var tokenInput = document.getElementsByName('token')[0];
+      var token = tokenInput.value;
+      layer.open({
+        //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+        type:2,
+        content:'/common/toPassCheck?id='+token+"&status=2",
+        area: ['40%', '60%'],
+        offset: 'auto',
+        title: '修改权限校验',
+        id: 'modify' //设定一个id，防止重复弹出
+      });
+    }
+
+    function seeUser(id){
+      var tokenInput = document.getElementsByName('token')[0];
+      var token = tokenInput.value;
+      layer.open({
+        //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+        type:2,
+        content:'/user/seeData/'+token,
+        area: ['30%', '60%'],
+        offset: 'auto',
+        id: 'modify' //设定一个id，防止重复弹出
+      });
+    }
+  </script>
+
+  <style>
+    .carousel-item img {
+      width: 100%;
+      height: 600px;
+      object-fit: cover;
+    }
+    h2.subtitle {
+      font-family: "宋体", Arial, sans-serif;
+      color: white;
+      font-weight: bold;
+      font-size: 2em;
+      text-shadow: 1px 1px 2px darkgrey;
+    }
+    p.subtitle {
+      font-family: "宋体", Arial, sans-serif;
+      color: white;
+      text-shadow: 1px 1px 2px darkgrey;
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-transparent navbar-light bg-white py-4">
+  <div class="container">
+    <div th:replace="../templates/front/public/header :: title"></div>
+
+    <button class="navbar-toggler" type="button" data-action="offcanvas-open" data-target="#navbar_main" aria-controls="navbar_main" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse offcanvas-collapse" id="navbar_main">
+      <ul class="navbar-nav ml-auto align-items-lg-center">
+        <div th:replace="../templates/front/public/header :: Navigationbar"></div>
+
+
+        <div class="dropdown-divider d-lg-none my-4"></div>
+        <div th:if="${not map.containsKey('token')}">
+          <!-- 当exampleBool为false时，该元素将被渲染 -->
+          <li class="nav-item">
+            <a th:href="@{/front/toLogin/}" class="btn btn-sm bg-white d-none d-lg-inline-flex">登录</a>
+          </li>
+        </div>
+        <div th:if="${map.containsKey('token')}">
+          <!-- 当exampleBool为true时，该元素将被渲染 -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbar_main_dropdown_2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              欢迎您, 用户&nbsp;<b th:text="${map['username']}"></b>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
+              <input th:value="${map.get('token')}" name="token" hidden>
+              <a class="dropdown-item" th:onclick="seeUser()">查看个人信息</a>
+              <a class="dropdown-item" th:onclick="modUser()">修改个人信息</a>
+              <a class="dropdown-item" th:href="@{/front/changeUser/}">切换登录</a>
+            </div>
+          </li>
+        </div>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+<main class="main">
+  <div id="myCarousel" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+      <li data-target="#myCarousel" data-slide-to="1"></li>
+      <li data-target="#myCarousel" data-slide-to="2"></li>
+    </ol>
+
+    <div class="carousel-inner" style="width:100%;margin: 0 auto;margin-top: 90px">
+      <div class="carousel-item active">
+        <img src="../assets/images/backgrounds/img-1.jpg" class="d-block w-100" alt="image1">
+        <div class="carousel-caption">
+          <h2 class="subtitle">油气储运</h2>
+          <p class="subtitle">为生产安全保驾护航</p>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <img src="../assets/images/backgrounds/img-2.jpg" class="d-block w-100" alt="image2">
+        <div class="carousel-caption">
+          <h2 class="subtitle">海上采油平台</h2>
+          <p class="subtitle">高自动化、信息化管理</p>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <img src="../assets/images/backgrounds/img-3.jpg" class="d-block w-100" alt="image3">
+        <div class="carousel-caption">
+          <h2 class="subtitle">齐备生产链</h2>
+          <p class="subtitle">为您提供齐备的技术服务</p>
+        </div>
+      </div>
+    </div>
+
+    <a class="carousel-control-prev" href="#myCarousel" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#myCarousel" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+
+  <section class="slice slice-xl">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-7">
+          <div class="text-center pt-lg-md">
+            <h2 class="heading h1 mb-4">
+              对我们有什么建议?
+            </h2>
+            <p class="lead lh-180">
+              欢迎您的致邮与评价
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div th:if="${not map.containsKey('token')}">
+    <div class="alert alert-inverse alert-dismissible fade show" style="width: 25%; margin:0 auto" role="alert">
+      <span class="alert-inner--icon text-warning"><i class="fas fa-exclamation"></i></span>
+      <span class="alert-inner--text">请先登录再留言!</span>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+
+      <!-- 当exampleBool为false时，该元素将被渲染 -->
+      <a type="button" style="margin-left: 60px" th:href="@{/front/toLogin/}"  class="btn btn-primary btn-animated btn-animated-x center-block">
+        <span class="btn-inner--visible">去登录</span>
+        <span class="btn-inner--hidden"><i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+
+  </div>
+  <div th:if="${map.containsKey('token')}">
+    <section class="slice slice-sm">
+    <div class="container">
+      <div class="row align-items-center cols-xs-space cols-sm-space cols-md-space">
+        <div class="col-lg-6">
+          <h3 class="heading h3 mb-4">Send us a message</h3>
+          <form class="form-primary layui-form" name="comment">
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  <input class="form-control" placeholder="Name" type="text" name="name">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  <input class="form-control" placeholder="Email address" type="email" name="email">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  <textarea class="form-control" rows="5" placeholder="Your message" name="message"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button class="btn btn-primary px-4" lay-submit="" lay-filter="comment">
+                Send message
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="col-lg-5 ml-lg-auto">
+          <h3 class="heading heading-3 strong-300">
+            联系我们
+            <br>
+          </h3>
+          <p class="mt-4">
+            地址1: 陕西省XX市高新区XX路62号朝阳国际广场B座21516室
+          </p>
+          <p class="">
+            地址2: 陕西省XX市高新区3D打印产业培训基地9号楼
+          </p>
+          <p class="lead mt-4 mb-4">
+            邮箱 : <a href="#">MINDE@makemed3d.com</a>
+            <br>
+            电话 :  029-82256744
+          </p>
+          <p class="">
+            明德油气责任有限公司是一家成立于2005年的能源公司，总部位于中国北京。公司的主要业务是石油和天然气的勘探、开采和销售。公司致力于为全球能源市场提供可持续发展的能源解决方案，以满足不断增长的能源需求和环保要求。公司在在华北地区、长江沿岸及东南沿海省份建有多个石油储罐场和加注站, 拥有先进的采油平台、千里油气管道和先进的石油加工设备。公司注重环保和安全生产,构建了完善的风险预控体系和应急预案, 还与国内外多家知名石油设备供应商建立了长期合作关系,不断更新更换设备来提高生产效率。与此同时, 还与名牌高校建立了多年的深度合作,不断吸纳高素质的石油人才来丰富和创新公司的经营管理理念。未来,公司将继续加大对科研投入,积极推进数字化、智能化进程,不断优化产品及服务,致力于成为国内一流的专业石油销售商和能源供应商。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+
+</main>
+<div th:replace="../templates/front/public/footer :: foot"></div>
+
+<script>
+  layui.use(['form'], function () {
+    var form = layui.form,
+        layer = layui.layer;
+
+    // 进行登录操作
+    form.on('submit(comment)', function (data) {
+      data = data.field;
+      console.log(data)
+      if (data.username == '') {
+        layer.msg('用户名不能为空');
+        return false;
+      }
+      if (data.password == '') {
+        layer.msg('密码不能为空');
+        return false;
+      }
+
+      //发送异步登录请求
+      $.ajax({
+        url:'/front/saveComment',
+        type:'POST',
+        data: {
+          name: data.name,
+          email: data.email,
+          message: data.message,
+        },
+        success:
+            function (response) {
+              layer.msg(response.msg);
+              console.log(response)
+              //code = 1 代表登录成功
+              if(response.code == "1"){
+                //上传成功
+                layer.msg(response.msg, {
+                  icon : 6,
+                  offset : "auto",
+                  time : 2000
+                });//提示框
+
+                setTimeout(function(){
+                  //带参跳转
+                  window.location.href = "/front/toContact"
+                }, 1000);
+                return false;
+              }
+              else if(response.code == "0"){
+                //上传成功
+                layer.msg(response.msg, {
+                  icon : 5,
+                  offset : "auto",
+                  time : 2000
+                });//提示框
+              }
+            },
+      })
+      return false;
+    });
+  });
+</script>
+
+<!-- Core -->
+<script th:src="@{/assets/vendor/jquery/jquery.min.js}"></script>
+<script th:src="@{/assets/vendor/popper/popper.min.js}"></script>
+<script th:src="@{/assets/js/bootstrap/bootstrap.min.js}"></script>
+<!-- FontAwesome 5 -->
+<script th:src="@{/assets/vendor/fontawesome/js/fontawesome-all.min.js}" defer></script>
+<!-- Page plugins -->
+<script th:src="@{/assets/vendor/bootstrap-select/js/bootstrap-select.min.js}"></script>
+<script th:src="@{/assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.min.js}"></script>
+<script th:src="@{/assets/vendor/input-mask/input-mask.min.js}"></script>
+<script th:src="@{/assets/vendor/nouislider/js/nouislider.min.js}"></script>
+<script th:src="@{/assets/vendor/textarea-autosize/textarea-autosize.min.js}"></script>
+<!-- Theme JS -->
+<script th:src="@{/assets/js/theme.js}"></script>
+</body>
+</html>

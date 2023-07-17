@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<h3>This is a thymeleaf test function!</h3>
+<div th:text="${msg}"></div>
+<hr>
+<h3 th:each="name:${list}" th:text="${name}"></h3>
+<h3 th:if="${isShow == 'true'}">if 显示</h3>
+
+</body>
+</html>

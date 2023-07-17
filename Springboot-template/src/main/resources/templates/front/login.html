@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Probably the most complete UI kit out there. Multiple functionalities and controls added,  extended color palette and beautiful typography, designed as its own extended version of Bootstrap at  the highest level of quality.                             ">
+    <meta name="author" content="Webpixels">
+    <title>登录</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
+    <!-- Theme CSS -->
+    <link th:href="@{/assets/css/theme.css}" rel="stylesheet">
+    <link th:href="@{/assets/css/demo.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+    <script th:src="@{/assets/layui.js}"></script>
+  </head>
+  <body>
+    <main class="main">
+      <section class="py-xl bg-cover bg-size--cover" data-spotlight="fullscreen" style="background-image: url('../../assets/images/backgrounds/img-1.jpg')">
+        <span class="mask bg-primary alpha-6"></span>
+        <div class="container d-flex align-items-center no-padding">
+          <div class="col">
+            <div class="row justify-content-center">
+              <div class="col-lg-4">
+                <div class="card bg-primary text-white">
+                  <div class="card-body">
+                    <a type="button" class="btn btn-primary btn-nobg btn-zoom--hover mb-5" th:href="@{/front/toFront}">
+                      <span class="btn-inner--icon"><i class="fas fa-arrow-left"></i></span>
+                    </a>
+                    <span class="clearfix"></span>
+                    <img th:src="@{/assets/images/brand/icon.png}" style="width: 50px;">
+                    <h4 class="heading h3 text-white pt-3 pb-5">Welcome back,<br>
+                      login to your account.</h4>
+                    <form class="form-primary layui-form" name="login">
+                      <div class="form-group">
+                        <input name="username" type="text" lay-verify="phone" class="form-control" id="input_email" placeholder="Your phone number">
+                      </div>
+                      <div class="form-group">
+                        <input name="password" type="password" class="form-control" id="input_password" placeholder="Password">
+                      </div>
+                      <button class="btn btn-block btn-lg bg-white mt-4"  lay-submit="" lay-filter="login">登录</button>
+                    </form>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer;
+
+        // 进行登录操作
+        form.on('submit(login)', function (data) {
+          data = data.field;
+          console.log(data)
+          if (data.username == '') {
+            layer.msg('用户名不能为空');
+            return false;
+          }
+          if (data.password == '') {
+            layer.msg('密码不能为空');
+            return false;
+          }
+
+          //发送异步登录请求
+          $.ajax({
+            url:'/front/login',
+            type:'POST',
+            data: {
+              username: data.username,
+              password: data.password,
+            },
+            success:
+                function (response) {
+                  layer.msg(response.msg);
+                  console.log(response)
+                  //code = 1 代表登录成功
+                  if(response.code == "1"){
+                    //保存tocken到cookie
+                    let cookie = "uname" + "=" + data.username + ";" + "uid" + "=" + response.data.id+ ";";
+                    let d = new Date();
+                    d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
+                    let expires = "expires=" + d.toGMTString();
+                    cookie = cookie + ' ' + expires;
+                    document.cookie = cookie;
+
+                    //上传成功
+                    layer.msg(response.msg, {
+                      icon : 6,
+                      offset : "auto",
+                      time : 2000
+                    });//提示框
+                    setTimeout(function(){
+                      //带参跳转
+                      window.location.href = "/front/toFront"
+                    }, 1000);
+                    return false;
+                  }
+                  else if(response.code == "0"){
+                    //上传成功
+                    layer.msg(response.msg, {
+                      icon : 5,
+                      offset : "auto",
+                      time : 2000
+                    });//提示框
+                  }
+                },
+          })
+          return false;
+        });
+      });
+    </script>
+
+    <!-- Core -->
+    <script th:src="@{/assets/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/assets/vendor/popper/popper.min.js}"></script>
+    <script th:src="@{/assets/js/bootstrap/bootstrap.min.js}"></script>
+    <!-- FontAwesome 5 -->
+    <script th:src="@{/assets/vendor/fontawesome/js/fontawesome-all.min.js}" defer></script>
+    <!-- Page plugins -->
+    <script th:src="@{/assets/vendor/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <script th:src="@{/assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.min.js}"></script>
+    <script th:src="@{/assets/vendor/input-mask/input-mask.min.js}"></script>
+    <script th:src="@{/assets/vendor/nouislider/js/nouislider.min.js}"></script>
+    <script th:src="@{/assets/vendor/textarea-autosize/textarea-autosize.min.js}"></script>
+    <!-- Theme JS -->
+    <script th:src="@{/assets/js/theme.js}"></script>
+  </body>
+</html>

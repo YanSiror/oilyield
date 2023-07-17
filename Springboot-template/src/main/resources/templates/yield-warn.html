@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- 指定字符集 -->
+    <meta charset="utf-8">
+    <!-- 使用Edge最新的浏览器的渲染方式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport视口：网页可以根据设置的宽度自动进行适配，在浏览器的内部虚拟一个容器，容器的宽度与设备的宽度相同。
+    width: 默认宽度与设备的宽度相同
+    initial-scale: 初始的缩放比，为1:1 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/layuimini.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/public.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+  <link rel="stylesheet" th:href="@{/assets/css/admin.css}">
+
+  <script th:src="@{/assets/js/jquery-2.1.0.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/js/echarts.min.js}" type="text/javascript"></script>
+  <script th:src="@{/assets/layui.js}"></script>
+  <script th:src="@{/assets/js/bootstrap.min.js}" type="text/javascript"></script>
+  <title>上传Excel</title>
+</head>
+<body>
+<div class="container" style="width: 100%">
+  <div class="layui-card" style="text-align: center;">
+      <h3><div class="layui-card-header layui-bg-cyan">油井产量分析趋势图</div></h3>
+  </div>
+
+  <form class="layui-form layuimini-form"  action="" style="margin-left: 30px" lay-filter="linechart">
+    <div class="layui-form-item">
+      <label class="layui-form-label">阈值</label>
+      <div class="layui-input-inline">
+        <input type="text" id="limit" name="limit" class="layui-input">
+      </div>
+      <button style="margin-left: 200px" class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-submit lay-filter="getChart">获取</button>
+    </div>
+  </form>
+
+  <div class="layui-row layui-col-space14" style="margin-top: 40px;">
+    <div class="layui-col-md6 layui-col-md-offset1" id="second" style="width:80%;height: 3000px"></div>
+  </div>
+</div>
+
+
+
+<script type="text/javascript">
+  // warns = [[${warns}]]
+  // var namesStr = "[[ ${names} ]]";
+  // var div = document.createElement('div');
+  // div.innerHTML = namesStr;
+  // var decodedNames = div.firstChild.textContent;
+  // // 将解码后的字符串转换为 JavaScript 对象
+  // var names = JSON.parse(decodedNames);
+  //
+  // let warndata = [];    // 新增一个数组变量
+  // for (var i = 0; i < warns.length; i++) {
+  //   if(warns[i] === -1){
+  //     warndata.push({ value: -1, label: 'left', itemStyle: {color: '#a90000'}},);    // 向数组中添加数据项
+  //   }else if(warns[i] === 1){
+  //     warndata.push({ value: 1, label: 'right', itemStyle: {color: '#00796B'}},);    // 向数组中添加数据项
+  //   }
+  // }
+  // console.log(warndata);
+  // console.log(names);
+  var chartDom = document.getElementById('second');
+  var mychart = echarts.init(chartDom);
+  var option = {
+    title: {
+      text: '油井运行异常检测图',
+      subtext: 'Error | Running (仅截取前100条数据, 具体数据请参阅产量信息)',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'value',
+      position: 'top',
+      splitLine: {
+        lineStyle: {
+          type: 'dashed'
+        }
+      }
+    },
+    yAxis: {
+      type: 'category',
+            axisTick: {
+        show: false
+      },
+      data: []
+    },
+    series: [
+      {
+        name: 'Running',
+        type: 'bar',
+        stack: 'Total',
+        label: {
+          show: true,
+          formatter: '{b}'
+        },
+        data: []
+      }
+    ]
+  };
+  option && mychart.setOption(option);
+
+  layui.use(['form'], function () {
+    var form = layui.form,
+        layer = layui.layer,
+        $ = layui.$;
+
+    //监听提交
+    form.on('submit(getChart)', function (data) {
+      console.log(data.field)
+      $.ajax({
+        url:'/yield/showWarn',
+        type:'post',
+        data :{
+          limit: data.field.limit,
+        },
+        success:function (response) {
+          layer.msg("获取成功", {icon: 6});
+          setTimeout(1000);
+          console.log(response)
+          let datas = [];    // 新增一个数组变量
+          warns = response.warns;
+          for (var i = 0; i < warns.length; i++) {
+            if(warns[i] === -1){
+              datas.push({ value: -1, label: 'left', itemStyle: {color: '#a90000'}},);    // 向数组中添加数据项
+            }else if(warns[i] === 1){
+              datas.push({ value: 1, label: 'right', itemStyle: {color: '#00796B'}},);    // 向数组中添加数据项
+            }
+          }
+          let series = [];
+          series.push(
+            {
+              name: 'Running',
+              type: 'bar',
+              stack: 'Total',
+              label: {
+                show: true,
+                formatter: '{b}'
+              },
+              data: datas
+            }
+          );
+
+          // 更新数据
+          let times = [];    // 新增一个数组变量
+          times.push({
+            type: 'category',
+            axisTick: {
+              show: false
+            },
+            data: response.names}
+          );    // 向数组中添加数据项
+
+          console.log(datas);
+          console.log(times);
+
+          option.series = series;
+          option.yAxis = times;
+          console.log(option);
+
+          // 重置
+          mychart.clear();
+          // 重新渲染
+          mychart.setOption(option);
+        }
+      })
+      return false;
+    });
+  });
+
+</script>
+
+</body>
+</html>

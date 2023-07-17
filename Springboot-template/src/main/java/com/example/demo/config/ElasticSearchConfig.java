@@ -1,0 +1,20 @@
+package com.example.demo.config;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.ElasticsearchClient;
+import org.elasticsearch.client.RestClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+//@Configuration
+public class ElasticSearchConfig {
+
+//    //注入IOC容器
+//    @Bean
+//    public ElasticsearchClient elasticsearchClient(){
+//        RestClient client = RestClient.builder(new HttpHost("localhost", 9200,"http")).build();
+//        ElasticsearchTransport transport = new RestClientTransport(client,new JacksonJsonpMapper());
+//        return new ElasticsearchClient(transport);
+//    }
+
+}

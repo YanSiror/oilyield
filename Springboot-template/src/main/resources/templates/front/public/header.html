@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+
+<div th:fragment="title">
+  <img src="../assets/img/logo.png"  style="width: 15%; height: 15%" class="img-fluid animated"
+       data-animation-in="jackInTheBox" data-animation-delay="1000">
+  <a class="navbar-brand" th:href="@{/front/toFront}">
+    <strong>
+    明德油气责任有限公司
+    </strong>
+  </a>
+</div>
+
+<body th:fragment="Navigationbar">
+  <h6 class="dropdown-header font-weight-600 d-lg-none px-0">Menu</h6>
+  <li class="nav-item active">
+    <a class="nav-link" th:href="@{/front/toFront}">首页</a>
+  </li>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbar_main_dropdown_1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">用户支持</a>
+    <div class="dropdown-menu" aria-labelledby="navbar_1_dropdown_1">
+      <a class="dropdown-item" th:href="@{/front/toFront}">主页</a>
+      <a class="dropdown-item" th:href="@{/front/toAbout}">关于我们</a>
+      <a class="dropdown-item" th:href="@{/front/toSigns}">注册</a>
+      <a class="dropdown-item" th:href="@{/front/toContact}">联系我们</a>
+    </div>
+  </li>
+</body>
+
+</html>
