@@ -888,6 +888,13 @@ public class YieldController {
             }
             Sheet sheet = workbook.getSheetAt(0);
             // 遍历 Excel 表格
+            LambdaQueryWrapper<Yield> queryWrapper = new LambdaQueryWrapper<>();
+            //添加排序条件，根据sort排序
+            queryWrapper.ge(Yield::getId,0);
+            //进行分页查询
+            List<Yield> yields = yieldService.list(queryWrapper);
+            // 由于使用自增id方式时会出现重复id的问题, 获取总数目
+            int index = yields.size();
             for (Row row : sheet) {
                 //忽略表头
                 if (row.getRowNum() == 0) {
@@ -895,7 +902,7 @@ public class YieldController {
                 }
 
                 // 将单元格的值赋值给实体类对应的属性
-                yield.setId((int)Double.parseDouble(getCellValue(row.getCell(0))));
+                yield.setId(++index);
                 yield.setWid((int)Double.parseDouble(getCellValue(row.getCell(1))));
                 yield.setWname(getCellValue(row.getCell(2)));
                 yield.setLiquid(Double.parseDouble(getCellValue(row.getCell(3))));

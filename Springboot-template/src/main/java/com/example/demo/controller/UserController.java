@@ -4,6 +4,7 @@ package com.example.demo.controller;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.demo.bean.Admin;
 import com.example.demo.bean.Staff;
 import com.example.demo.bean.User;
 import com.example.demo.services.UserService;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -91,6 +93,16 @@ public class UserController {
         //打印封装数据
         LayuiUtils<List<User>> result = new LayuiUtils<List<User>>("1", null,1,0);
         return result;
+    }
+
+    @RequestMapping("/toList")
+    public String toList(){
+        return "user-list";
+    }
+
+    @RequestMapping("/toAdd")
+    public String toAdd(){
+        return "user-add";
     }
 
     //采用分页代码方法
