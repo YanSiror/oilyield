@@ -1,6 +1,5 @@
 package com.example.demo.config;
 
-import org.apache.tomcat.jni.Local;
 import org.springframework.web.servlet.LocaleResolver;
 import org.thymeleaf.util.StringUtils;
 

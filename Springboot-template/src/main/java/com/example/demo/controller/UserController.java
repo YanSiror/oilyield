@@ -29,9 +29,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 在该文件集成了 Redis 缓存
+ * UserController
+ * @author: JingYan
+ * @Time 18/3/2023
  */
-
 @RequestMapping("/user")
 @Controller
 public class UserController {
@@ -50,9 +51,9 @@ public class UserController {
 
     @RequestMapping("/modify")
     @ResponseBody
-    public LayuiUtils<List<User>> modify(User User){
-        System.out.println("modify:"+User.toString());
-        userService.updateById(User);
+    public LayuiUtils<List<User>> modify(User user){
+        System.out.println("modify:"+user.toString());
+        userService.updateById(user);
         //打印封装数据
         LayuiUtils<List<User>> result = new LayuiUtils<List<User>>("1", null,1,0);
         return result;
@@ -63,10 +64,10 @@ public class UserController {
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
-        User User = userService.getById(id);
+        User user = userService.getById(id);
         //设置模型
-        mv.addObject("user", JSON.toJSONString(User));
-        System.out.println(JSON.toJSONString(User));
+        mv.addObject("user", JSON.toJSONString(user));
+        System.out.println(JSON.toJSONString(user));
         //设置视图
         mv.setViewName("user-modify");
         return mv;
@@ -105,7 +106,12 @@ public class UserController {
         return "user-add";
     }
 
-    //采用分页代码方法
+    /**
+     * 采用分页代码方法, 遍历 User
+     * @param page
+     * @param size
+     * @return
+     */
     @RequestMapping("/list")
     @ResponseBody
     public LayuiUtils<List<User>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {
@@ -137,11 +143,11 @@ public class UserController {
         user.setName(name);
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<User>();
         lambdaQueryWrapper.like(name != null, User::getName,name);
-        List<User> Userlist = userService.list(lambdaQueryWrapper);
+        List<User> userList = userService.list(lambdaQueryWrapper);
         //使用PageInfo包装数据
-        PageInfo<User> pageInfo = new PageInfo<User> (Userlist,3);
+        PageInfo<User> pageInfo = new PageInfo<User> (userList,3);
         //打印封装数据
-        LayuiUtils<List<User>> result = new LayuiUtils<List<User>>("", Userlist,0,(int)pageInfo.getTotal());
+        LayuiUtils<List<User>> result = new LayuiUtils<List<User>>("", userList,0,(int)pageInfo.getTotal());
         System.out.println(JSON.toJSONString(result));
         return result;
     }

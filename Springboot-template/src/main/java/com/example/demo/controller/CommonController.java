@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo.bean.Admin;
 import com.example.demo.bean.Mail;
 import com.example.demo.bean.Staff;
@@ -11,38 +10,28 @@ import com.example.demo.services.StaffService;
 import com.example.demo.services.UserService;
 import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.FileUploadUtils;
-import com.example.demo.utils.FtpFileUtil;
 import com.example.demo.utils.LayuiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
+/**
+ * CommonController
+ * @author: JingYan
+ * @Time 18/3/2023
+ */
 @RequestMapping("/common")
 @Controller
 public class CommonController {
@@ -67,7 +56,7 @@ public class CommonController {
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
         model.addAttribute("map", map);
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap<>(100);
         params.put("id", id);
         params.put("status", status);
         //查找 email
@@ -121,7 +110,7 @@ public class CommonController {
         List<Admin> admins = adminService.list();
         List<Staff> staffs = staffService.list();
         List<User> users = userService.list();
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>(100);
         for(Admin admin: admins){
             map.put(admin.getEmail(), 0);
         }

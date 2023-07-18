@@ -12,6 +12,11 @@ import org.springframework.data.elasticsearch.core.suggest.Completion;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * WellE Pojo - For elasticSearch document create and utilze
+ * @author: JingYan
+ * @Time 18/4/2023
+ */
 @Document(indexName = "well")
 public class WellE {
     @Id

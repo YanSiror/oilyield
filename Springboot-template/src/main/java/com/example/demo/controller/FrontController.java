@@ -26,6 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * FrontController
+ * @author: JingYan
+ * @Time 18/3/2023
+ */
 @RequestMapping("/front")
 @Controller
 public class FrontController {
@@ -69,7 +74,12 @@ public class FrontController {
         }
     }
 
-    //前端跳转
+    /**
+     * 前端主页跳转
+     * @param model
+     * @param request
+     * @return
+     */
     @RequestMapping("/toFront")
     public String toFront(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
@@ -78,7 +88,12 @@ public class FrontController {
         return "front/frontMain";
     }
 
-    //前端跳转
+    /**
+     * 前台页面的主页 header 模板
+     * @param model
+     * @param request
+     * @return
+     */
     @RequestMapping("/toHeader")
     public String toHeader(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);

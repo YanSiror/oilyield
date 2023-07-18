@@ -12,12 +12,9 @@ import org.springframework.data.elasticsearch.core.suggest.Completion;
 import java.io.Serializable;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author VOF
- * @since 2023-04-16
+ * Well Pojo
+ * @author: JingYan
+ * @Time 18/4/2023
  */
 public class Well implements Serializable {
     private static final long serialVersionUID = 1L;

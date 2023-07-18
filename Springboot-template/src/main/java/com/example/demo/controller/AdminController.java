@@ -37,6 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * AdminController
+ * @author: JingYan
+ * @Time 18/3/2023
+ */
 @RequestMapping("/admin")
 @Controller
 public class AdminController {
@@ -108,14 +113,15 @@ public class AdminController {
             return new LayuiUtils<Admin>("null", null,0,0);
         }
 
+
         Admin user = new Admin();
-        if("管理员".equals(type)){
+        if(Integer.parseInt(type) == 0){
             //根据类型判断登录
             LambdaQueryWrapper<Admin> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Admin::getUsername,admin.getUsername());
             queryWrapper.eq(Admin ::getPassword,admin.getPassword());
             user = adminService.getOne(queryWrapper);
-        } else if("用户".equals(type)){
+        } else if(Integer.parseInt(type) == 1){
             //根据类型判断登录
             LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Staff::getId, Integer.parseInt(admin.getUsername()));
@@ -132,19 +138,16 @@ public class AdminController {
 
         //获取数据
         String verifycode = request.getParameter("verifycode");
-        //System.out.println(verifycode);
-
         //验证码检验
         HttpSession session = request.getSession();
         //强转 获取用户填写的验证码
-        String checkcode_server = (String)session.getAttribute("CHECKCODE_SERVER");
-        //System.out.println(checkcode_server);
-        session.removeAttribute("CHECKCODE_SERVER");        //将已使用的验证码从session中移除,确保验证码单次
+        String checkCode = (String)session.getAttribute("CHECKCODE_SERVER");
+        //将已使用的验证码从session中移除,确保验证码单次
+        session.removeAttribute("CHECKCODE_SERVER");
 
-        //设置视图
         //验证码不正确
         LayuiUtils<Admin> result = null;
-        if(checkcode_server == null){
+        if(checkCode == null){
             result = new LayuiUtils<Admin>("无验证码信息", user,0,0);
         }
         else if(user == null) {
@@ -152,8 +155,8 @@ public class AdminController {
             result = new LayuiUtils<Admin>("用户名或密码错误", null,0,0);
             return result;
         }
-        else if(!checkcode_server.equalsIgnoreCase(verifycode)){
-            System.out.println(verifycode + checkcode_server);
+        else if(!checkCode.equalsIgnoreCase(verifycode)){
+            System.out.println(verifycode + checkCode);
             result = new LayuiUtils<Admin>("验证码错误", user,0,0);
             return result;
         }
@@ -161,10 +164,10 @@ public class AdminController {
             //打印封装数据
             session.setAttribute("loginUser",admin.getUsername());
             model.addAttribute("admin", admin);
-            if("管理员".equals(type)){
+            if(Integer.parseInt(type) == 0){
                 result = new LayuiUtils<Admin>("登录成功", user,1,0);
             }
-            else if("用户".equals(type)) {
+            else if(Integer.parseInt(type) == 1) {
                 result = new LayuiUtils<Admin>("登录成功", user,2,0);
             }
             return result;
@@ -172,25 +175,34 @@ public class AdminController {
         return result = new LayuiUtils<Admin>("未知错误", user,0,0);
     }
 
-    //采用分页代码方法
+    /**
+     * 采用分页代码方法
+     * @param adminId
+     * @return ModelAndView
+     */
     @RequestMapping("/list/{adminId}")
     public ModelAndView list(@PathVariable("adminId") int adminId) {
         ModelAndView mv = new ModelAndView();
-        Admin admin = adminService.getById(adminId);    //紧跟的第一个select方法被分页
+        //紧跟的第一个select方法被分页
+        Admin admin = adminService.getById(adminId);
         mv.addObject("admin", admin);
         System.out.println(admin.toString());
         mv.setViewName("admin-list");
         return mv;
     }
 
-    //上传文件
+    /**
+     * //上传文件
+     * @param uploadFile
+     * @throws IOException
+     */
     @RequestMapping("/uploadHead")
     public void uploadHead(MultipartFile uploadFile) throws IOException{
-        //生成文件夹
         // 创建文件路径
         File file = new File(filePath);
-        if(!file.exists()){		//如果 module文件夹不存在
-            file.mkdir();		//创建文件夹
+        //如果 module文件夹不存在,创建文件夹
+        if(!file.exists()){
+            file.mkdir();
         }
 
         String name;        //文件名
@@ -208,7 +220,12 @@ public class AdminController {
     }
 
 
-    //保存头像
+    /**
+     * 保存头像
+     * @param id
+     * @param filename
+     * @return
+     */
     @RequestMapping("/saveHeader")
     @ResponseBody
     public LayuiUtils<Admin> saveHeader(String id, String filename){
@@ -220,7 +237,12 @@ public class AdminController {
         return new LayuiUtils<Admin>("保存成功", admin,1,0);
     }
 
-    //获取头像
+    /**
+     * 获取头像
+     * @param id
+     * @param response
+     * @throws IOException
+     */
     @RequestMapping("/getHeader")
     public void getHeader(String id, HttpServletResponse response) throws IOException {
         //服务器通知浏览器不要缓存
@@ -283,7 +305,7 @@ public class AdminController {
         //1、将所有的用户和管理员信息读取到一起
         List<Admin> admins = adminService.list();
         List<Staff> staffs = staffService.list();
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>(1000);
         for(Admin admin: admins){
             map.put(admin.getEmail(), 0);
         }
@@ -336,19 +358,20 @@ public class AdminController {
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setSubject("验证码"); // 标题
+        // 标题
+        helper.setSubject("验证码");
         String checkcode = CommonApi.getCheckCode();
 
         //将验证码放入HttpSession中
         request.getSession().setAttribute("codes",checkcode);
         // 内容, 第二个参数为true则以html方式发送, 否则以普通文本发送
         helper.setText("<h1 style='red'>" + checkcode + "</h1>", true);
-        //发送附件
-        //helper.addAttachment("1.jpg",new File("C:\\Users\\zpk\\Desktop\\loading\\加载-063.gif"));
-
-        helper.setTo(mail); // 收件人
-        helper.setFrom(from); // 发件人
-        javaMailSender.send(message); // 发送
+        // 收件人
+        helper.setTo(mail);
+        // 发件人
+        helper.setFrom(from);
+        // 发送
+        javaMailSender.send(message);
         //打印封装数据
         return new LayuiUtils<String>("发送成功", null,1,0);
     }

@@ -1,17 +1,28 @@
 package com.example.demo.bean;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+/**
+ * Product Pojo
+ * @author: JingYan
+ * @Time 18/7/2023
+ */
+@TableName("product")
 public class Product {
-    Integer id;          //编号
-    String name;    //产品名
-    double price;     //产品价格
-    String infor;     //产品信息
-    String img;       //产品图片
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;          //编号
+    private String name;    //产品名
+    private Double price;     //产品价格
+    private String infor;     //产品信息
+    private String img;       //产品图片
 
 
     public Product() {
     }
 
-    public Product(int id, String name, double price, String infor, String img) {
+    public Product(Integer id, String name, Double price, String infor, String img) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -42,7 +53,7 @@ public class Product {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -58,7 +69,7 @@ public class Product {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

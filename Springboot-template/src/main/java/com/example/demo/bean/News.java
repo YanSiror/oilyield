@@ -11,12 +11,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author VOF
- * @since 2023-05-05
+ * Product Pojo
+ * @author: JingYan
+ * @Time 18/7/2023
  */
 @Data
 @EqualsAndHashCode(callSuper = false)

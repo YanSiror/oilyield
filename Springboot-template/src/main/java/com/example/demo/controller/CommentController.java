@@ -22,9 +22,10 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
- * 在该文件集成了 Redis 缓存
+ * CommentController
+ * @author: JingYan
+ * @Time 18/3/2023
  */
-
 @RequestMapping("/comment")
 @Controller
 public class CommentController {
@@ -51,7 +52,12 @@ public class CommentController {
         return result;
     }
 
-    //产品删除
+    /**
+     * 产品删除
+     * @param ids
+     * @return
+     * @throws Exception
+     */
     @RequestMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<Comment>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
@@ -65,10 +71,10 @@ public class CommentController {
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
-        Comment Comment = commentService.getById(id);
+        Comment comment = commentService.getById(id);
         //设置模型
-        mv.addObject("Comment", JSON.toJSONString(Comment));
-        System.out.println(JSON.toJSONString(Comment));
+        mv.addObject("Comment", JSON.toJSONString(comment));
+        System.out.println(JSON.toJSONString(comment));
         //设置视图
         mv.setViewName("comment-modify");
         return mv;
@@ -95,7 +101,12 @@ public class CommentController {
         return "comment-list";
     }
 
-    //采用分页代码方法
+    /**
+     * 采用分页代码方法
+     * @param page
+     * @param size
+     * @return
+     */
     @RequestMapping("/list")
     @ResponseBody
     public LayuiUtils<List<Comment>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {

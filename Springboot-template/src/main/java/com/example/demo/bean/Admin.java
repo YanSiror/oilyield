@@ -1,16 +1,31 @@
 package com.example.demo.bean;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+
+/**
+ * Admin Pojo
+ * @author: JingYan
+ * @Time 18/3/2023
+ */
+@TableName("admin")
 public class Admin {
-    int id;
-    String username;
-    String password;
-    String email;
-    String header;      //头像
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
+    private String username;
+    private String password;
+    private String email;
+    /**
+     头像
+     */
+    String header;
 
     public Admin() {
     }
 
-    public Admin(int id, String username, String password, String email, String header) {
+    public Admin(Integer id, String username, String password, String email, String header) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -23,14 +38,14 @@ public class Admin {
         this.password = password;
     }
 
-    public Admin(int id, String username, String password, String email) {
+    public Admin(Integer id, String username, String password, String email) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
     }
 
-    public Admin(int id, String header) {
+    public Admin(Integer id, String header) {
         this.id = id;
         this.header = header;
     }
@@ -50,7 +65,7 @@ public class Admin {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -35,9 +35,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 /**
- * 在该文件集成了 Redis 缓存
+ * ProductController
+ * @author: JingYan
+ * @Time 18/3/2023
  */
-
 @RequestMapping("/product")
 @Controller
 public class ProductController {
@@ -59,15 +60,20 @@ public class ProductController {
 
     @RequestMapping("/modify")
     @ResponseBody
-    public LayuiUtils<List<Product>> modify(Product Product){
-        System.out.println("modify:"+Product.toString());
-        productService.updateById(Product);
+    public LayuiUtils<List<Product>> modify(Product product){
+        System.out.println("modify:"+product.toString());
+        productService.updateById(product);
         //打印封装数据
         LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,1,0);
         return result;
     }
 
-    //产品删除
+    /**
+     * 产品删除
+     * @param ids
+     * @return
+     * @throws Exception
+     */
     @RequestMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<Product>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
@@ -81,10 +87,10 @@ public class ProductController {
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
-        Product Product = productService.getById(id);
+        Product product = productService.getById(id);
         //设置模型
-        mv.addObject("product", JSON.toJSONString(Product));
-        System.out.println(JSON.toJSONString(Product));
+        mv.addObject("product", JSON.toJSONString(product));
+        System.out.println(JSON.toJSONString(product));
         //设置视图
         mv.setViewName("product-modify");
         return mv;
@@ -111,10 +117,15 @@ public class ProductController {
         return "product-list";
     }
 
-    //采用分页代码方法
+    /**
+     * 采用分页代码方法
+     * @param page
+     * @param limit
+     * @return
+     */
     @RequestMapping("/list_front")
     @ResponseBody
-    public LayuiUtils<List<Product>> list_front(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "3")int limit) {
+    public LayuiUtils<List<Product>> listFront(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "3")int limit) {
         ModelAndView mv = new ModelAndView();
         //条件构造器对象
         LambdaQueryWrapper<Product> queryWrapper = new LambdaQueryWrapper<>();
@@ -131,9 +142,6 @@ public class ProductController {
             String name = split[split.length - 1];
             System.out.println(name);
             product.setImg(name);
-
-//            Path path = Paths.get(filePath, product.getImg());
-//            product.setImg(String.valueOf(path));
         }
 
         System.out.println(pageinfo.toString());
@@ -144,7 +152,12 @@ public class ProductController {
         return result;
     }
 
-    //采用分页代码方法
+    /**
+     * 遍历所有的产量信息, 分页
+     * @param page
+     * @param size
+     * @return
+     */
     @RequestMapping("/list")
     @ResponseBody
     public LayuiUtils<List<Product>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "3")int size) {
@@ -176,16 +189,21 @@ public class ProductController {
         product.setName(name);
         LambdaQueryWrapper<Product> lambdaQueryWrapper = new LambdaQueryWrapper<Product>();
         lambdaQueryWrapper.like(name != null, Product::getName,name);
-        List<Product> ProductList = productService.list(lambdaQueryWrapper);
+        List<Product> productList = productService.list(lambdaQueryWrapper);
         //使用PageInfo包装数据
-        PageInfo<Product> pageInfo = new PageInfo<Product> (ProductList,3);
+        PageInfo<Product> pageInfo = new PageInfo<Product> (productList,3);
         //打印封装数据
-        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("", ProductList,0,(int)pageInfo.getTotal());
+        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("", productList,0,(int)pageInfo.getTotal());
         System.out.println(JSON.toJSONString(result));
         return result;
     }
 
-    //保存头像
+    /**
+     * 保存图片
+     * @param id
+     * @param filename
+     * @return
+     */
     @RequestMapping("/saveHeader")
     @ResponseBody
     public LayuiUtils<Product> saveHeader(String id, String filename){
@@ -199,7 +217,12 @@ public class ProductController {
     }
 
 
-    //获取头像
+    /**
+     * 获取图片
+     * @param id
+     * @param response
+     * @throws IOException
+     */
     @RequestMapping("/getHeader")
     public void getHeader(String id, HttpServletResponse response) throws IOException {
         //服务器通知浏览器不要缓存
@@ -224,13 +247,18 @@ public class ProductController {
         ImageIO.write(image,"PNG",response.getOutputStream());
     }
 
-    //上传文件
+    /**
+     * 上传文件
+     * @param uploadFile
+     * @throws IOException
+     */
     @RequestMapping("/uploadHead")
     public void uploadHead(MultipartFile uploadFile) throws IOException{
-        //生成文件夹
+        //
+        //生成文件夹, 如果 module文件夹不存在则创建文件夹
         File file=new File(filePath);
-        if(!file.exists()){		//如果 module文件夹不存在
-            file.mkdir();		//创建文件夹
+        if(!file.exists()){
+            file.mkdir();
         }
 
         String name;        //文件名

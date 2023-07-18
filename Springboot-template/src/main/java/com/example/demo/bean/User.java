@@ -12,12 +12,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    Integer id;             //编号
-    String name;        //名字
-    String sex;         //性别
-    int age;            //年龄
-    String phone;       //电话
-    String email;       //邮箱
-    String password;    //密码
+    private Integer id;             //编号
+    private String name;        //名字
+    private String sex;         //性别
+    private Integer age;            //年龄
+    private String phone;       //电话
+    private String email;       //邮箱
+    private String password;    //密码
 
 }

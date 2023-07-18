@@ -10,12 +10,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * <p>
- * 
- * </p>
- *
- * @author VOF
- * @since 2023-04-16
+ * Yield Pojo
+ * @author: JingYan
+ * @Time 18/4/2023
  */
 public class Yield implements Serializable {
 
@@ -35,12 +32,12 @@ public class Yield implements Serializable {
     private Date time;
     private Double ptime;
     @TableField(exist = false)
-    private int status;
+    private Integer status;
 
     public Yield() {
     }
 
-    public Yield(Integer id, Integer wid, String wname, Double liquid, Double oil, Double water, Double gas, Double rate, Date time, Double ptime, int status) {
+    public Yield(Integer id, Integer wid, String wname, Double liquid, Double oil, Double water, Double gas, Double rate, Date time, Double ptime, Integer status) {
         this.id = id;
         this.wid = wid;
         this.wname = wname;
@@ -159,7 +156,7 @@ public class Yield implements Serializable {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 }

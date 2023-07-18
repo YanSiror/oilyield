@@ -1,27 +1,36 @@
 package com.example.demo.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
 
-//ְԱ��
+/**
+ * Staff Pojo
+ * @author: JingYan
+ * @Time 18/4/2023
+ */
+@TableName("staff")
 public class Staff implements Serializable {
-    Integer id;             //编号
-    String name;        //名字
-    String sex;         //性别
-    int age;            //年龄
-    String phone;       //电话
-    String position;    //ְ地址
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;             //编号
+    private String name;        //名字
+    private String sex;         //性别
+    private Integer age;            //年龄
+    private String phone;       //电话
+    private String position;    //ְ地址
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    Date indate;        //入职时间
-    double salary;      //薪资
-    String password;    //密码
-    String email;    //密码
+    private Date indate;        //入职时间
+    private Double salary;      //薪资
+    private String password;    //密码
+    private String email;    //密码
 
-    public Staff(int id, String name, String sex, int age, String phone, String position, Date indate, double salary, String password, String email) {
+    public Staff(Integer id, String name, String sex, Integer age, String phone, String position, Date indate, Double salary, String password, String email) {
         this.id = id;
         this.name = name;
         this.sex = sex;
@@ -71,7 +80,7 @@ public class Staff implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -95,7 +104,7 @@ public class Staff implements Serializable {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -127,7 +136,7 @@ public class Staff implements Serializable {
         return salary;
     }
 
-    public void setSalary(double salary) {
+    public void setSalary(Double salary) {
         this.salary = salary;
     }
 }

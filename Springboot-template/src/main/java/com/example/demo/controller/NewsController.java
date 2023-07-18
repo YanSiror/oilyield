@@ -23,9 +23,10 @@ import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
- * 在该文件集成了 Redis 缓存
+ * NewsController
+ * @author: JingYan
+ * @Time 18/3/2023
  */
-
 @RequestMapping("/news")
 @Controller
 public class NewsController {

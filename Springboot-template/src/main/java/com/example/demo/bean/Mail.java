@@ -10,6 +10,11 @@ import lombok.Setter;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
+/**
+ * Mail Pojo
+ * @author: JingYan
+ * @Time 18/7/2023
+ */
 @Getter
 @Setter
 @NoArgsConstructor
