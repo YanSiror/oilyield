@@ -55,8 +55,13 @@
 - **数据库设计**
 
   <img src="imgs/image-20230713184401419.png" alt="image-20230713184401419" style="zoom:80%;" />
-
-
+  
+  - 演示图
+  ![login](imgs/image-1688713871831.png) <br>
+  <img src="imgs/menu.png" alt="image-20230713184401419" style="zoom:80%;" />
+  
+  - **在线演示地址**
+  [项目地址](http://162.14.77.92:9732/index.html?language=zh_CN  "项目地址")  
 
 
 
