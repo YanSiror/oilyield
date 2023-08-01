@@ -10,4 +10,18 @@ public interface StaffService extends IService<Staff> {
      * @param ids
      */
     void deleteSelected(String ids);
+
+    /**
+     * 根据邮箱查找
+     * @param email
+     * @return
+     */
+    public Boolean findByEmail(String email);
+
+    /**
+     * 根据电话查找
+     * @param phone
+     * @return
+     */
+    public Boolean findByPhone(String phone);
 }

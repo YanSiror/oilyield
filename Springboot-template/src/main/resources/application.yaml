@@ -12,11 +12,14 @@ spring:
   messages:
     basename: i18n.login
   mail:
-    username: 1719831051@qq.com
-    password: uottbxykjomldghb
+#    username: 1719831051@qq.com
+#    password: uottbxykjomldghb
+    username: 3188727593@qq.com
+    password: qmvxpjdtqjumdhej
     host: smtp.qq.com
     protocol: smtp
-    from: 1719831051@qq.com
+    from: 3188727593@qq.com
+    # from: 1719831051@qq.com
   servlet:
     multipart:
       max-file-size: 1000MB
@@ -56,6 +59,5 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
-
 
 

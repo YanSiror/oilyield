@@ -94,6 +94,7 @@
 
         <div class="layui-form-item" style="text-align: center">
           <a class="btn btn-sm" th:href="@{/front/toFront}">转到前台</a>
+          <a class="btn btn-sm" onclick="forgetPass()">忘记密码</a>
           <p class="mt-5 mb-3 text-muted" style="text-align: center;margin-top: 10px">© 2023-2027</p>
           <a class="btn btn-sm" th:href="@{/index.html(language='zh_CN')}">中文</a>
           <a class="btn btn-sm" th:href="@{/index.html(language='en_US')}">English</a>
@@ -104,6 +105,21 @@
     </div>
 
     <script>
+      function forgetPass(){
+        //使用验证码登录
+        index = layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/common/toForgetPass',
+          area: ['32%', '40%'],
+          fixed: false, // 不固定
+          maxmin: true,
+          shadeClose: true,
+          title: '忘记密码',
+          offset: 'auto',
+          id: 'forgetPass' //设定一个id，防止重复弹出
+        });
+      }
       function loginWithCode(){
         //使用验证码登录
         layer.open({
@@ -140,7 +156,7 @@
           //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
           type:2,
           content:'/staff/toSignin',
-          area: ['40%', '40%'],
+          area: ['40%', '70%'],
           fixed: false, // 不固定
           maxmin: true,
           shadeClose: true,

@@ -1,13 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.bean.Admin;
-import com.example.demo.bean.Mail;
-import com.example.demo.bean.Staff;
-import com.example.demo.bean.User;
-import com.example.demo.services.AdminService;
-import com.example.demo.services.ProducerService;
-import com.example.demo.services.StaffService;
-import com.example.demo.services.UserService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.demo.bean.*;
+import com.example.demo.services.*;
 import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.FileUploadUtils;
 import com.example.demo.utils.LayuiUtils;
@@ -42,6 +37,8 @@ public class CommonController {
     @Autowired
     private UserService userService;
     @Autowired
+    private PassForgetService passforgetService;
+    @Autowired
     private  JavaMailSenderImpl javaMailSender;
     @Autowired
     private ProducerService productService;
@@ -49,6 +46,130 @@ public class CommonController {
     private String from;
 
     String filePath = String.valueOf(Paths.get(FileUploadUtils.realPath, "headers"));
+
+    /**
+     * 忘记密码请求
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping("/toForgetPass")
+    public String toForgetPass(Model model, HttpServletRequest request){
+        Map<String, String> map = CommonApi.getCookie(request);
+        System.out.println("map:" + map.toString());
+        model.addAttribute("map", map);
+        return "pass-forget";
+    }
+
+    /**
+     * 邮箱失效, 忘记密码请求管理员更改密码
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping("/toPassRequest")
+    public String toPassRequest(Model model, HttpServletRequest request){
+        Map<String, String> map = CommonApi.getCookie(request);
+        System.out.println("map:" + map.toString());
+        model.addAttribute("map", map);
+        return "pass-request";
+    }
+
+    /**
+     * 检测邮箱是否存在重复, 所有表 staff admin user 邮箱仅允许存在 1 组
+     * @param email
+     * @return
+     */
+    @RequestMapping("/checkEmail")
+    @ResponseBody
+    public LayuiUtils<Staff> checkEmail(String email) {
+        return new LayuiUtils<Staff>("未知错误!", null,1,0);
+    }
+
+    /**
+     * 向管理员递交修改密码请求
+     * @param email
+     * @param phone
+     * @param pass
+     * @return
+     */
+    @RequestMapping("/passRequest")
+    @ResponseBody
+    public LayuiUtils<Staff> passRequestStaff(String email, String phone, String pass) {
+        System.out.println(email + phone + pass);
+        //根据 Email 在数据库中遍历
+        //根据邮箱判断用户是否存在
+        //1、职员
+        LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<Staff>();
+        queryWrapper.eq(Staff::getEmail,email);
+        queryWrapper.eq(Staff::getPhone,phone);
+        Staff staff = staffService.getOne(queryWrapper);
+        //2、用户
+        LambdaQueryWrapper<User> queryWrapper1 = new LambdaQueryWrapper<User>();
+        queryWrapper1.eq(User::getEmail, email);
+        queryWrapper1.eq(User::getPhone, phone);
+        User user = userService.getOne(queryWrapper1);
+        if(user == null && staff == null){
+            return new LayuiUtils<Staff>("邮箱或电话不存在!", null,1,0);
+        } else if(staff != null){
+            //存入数据库
+            passforgetService.save(new PassForget(1, staff.getId(), 0, pass));
+            return new LayuiUtils<Staff>("请求成功, 已发起修改请求, 请等待...", null,0,0);
+        } else if(user != null){
+            //存入数据库
+            passforgetService.save(new PassForget(1, user.getId(), 1, pass));
+            return new LayuiUtils<Staff>("请求成功, 已发起修改请求, 请等待...", null,0,0);
+        }
+        return new LayuiUtils<Staff>("未知错误!", null,1,0);
+    }
+
+    /**
+     * 忘记密码后, 用户通过邮件修改密码
+     * @param email
+     * @param code
+     * @param pass
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping("/forgetPass")
+    @ResponseBody
+    public LayuiUtils<Staff> forgetPass(String email, String code, String pass, Model model, HttpServletRequest request) {
+        System.out.println(email + code + pass);
+        //从 session 中获取验证码
+        HttpSession session = request.getSession();
+        String serverCode = (String)session.getAttribute("codes");
+        if(!code.equalsIgnoreCase(serverCode)){
+            return new LayuiUtils<Staff>("验证码错误!", null,1,0);
+        }
+
+        //根据 Email 在数据库中遍历
+        //根据邮箱判断用户是否存在
+        //1、职员
+        LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<Staff>();
+        queryWrapper.eq(Staff::getEmail,email);
+        Staff staff = staffService.getOne(queryWrapper);
+        //2、用户
+        LambdaQueryWrapper<User> queryWrapper1 = new LambdaQueryWrapper<User>();
+        queryWrapper1.eq(User::getEmail,email);
+        User user = userService.getOne(queryWrapper1);
+        if(user == null && staff == null){
+            return new LayuiUtils<Staff>("邮箱或电话不存在!", null,1,0);
+        } else if(staff != null){
+            //BCrypt 加密
+            staff.setPassword(CommonApi.encodePassword(pass));
+            //更新数据库
+            staffService.updateById(staff);
+            return new LayuiUtils<Staff>("职员密码修改成功", null,0,0);
+        } else if(user != null){
+            //BCrypt 加密
+            user.setPassword(CommonApi.encodePassword(pass));
+            //更新数据库
+            userService.updateById(user);
+            return new LayuiUtils<Staff>("用户密码修改成功", null,0,0);
+        }
+        return new LayuiUtils<Staff>("未知错误!", null,1,0);
+    }
 
     @RequestMapping("/toPassCheck")
     public String toPassCheck(String id, String status, Model model, HttpServletRequest request){

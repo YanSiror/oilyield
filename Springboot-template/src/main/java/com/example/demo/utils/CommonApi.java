@@ -1,11 +1,20 @@
 package com.example.demo.utils;
 
+import com.example.demo.bean.Admin;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.DigestUtils;
+
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+/**
+ * @author Jing Yan
+ */
 public class CommonApi {
     public static Map<String, String> getCookie(HttpServletRequest request){
         Cookie[] cookies = request.getCookies();
@@ -38,5 +47,18 @@ public class CommonApi {
             sb.append(c);
         }
         return sb.toString();
+    }
+
+    public static String encryMd5(String str){
+        return DigestUtils.md5DigestAsHex(str.getBytes());
+    }
+
+    public static String encodePassword(String password) {
+        return new BCryptPasswordEncoder().encode(password);
+    }
+
+    public static boolean validatePassword(Admin admin, String password) {
+        //有顺序, 左侧为未加密的字符串, 右侧为加密好的数据
+        return new BCryptPasswordEncoder().matches(admin.getPassword(), password);
     }
 }

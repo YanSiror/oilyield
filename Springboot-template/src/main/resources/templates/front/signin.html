@@ -53,9 +53,12 @@
                         <input name="username" type="text" lay-verify="phone" class="form-control" id="input_email" placeholder="Your phone number">
                       </div>
                       <div class="form-group">
+                        <input name="email" type="text" class="form-control" placeholder="Youre email">
+                      </div>
+                      <div class="form-group">
                         <input name="password" type="password" class="form-control" id="input_password" placeholder="Password">
                       </div>
-                      <button lay-submit="" class="btn btn-block btn-lg bg-white mt-4" lay-filter="signin">登录</button>
+                      <button lay-submit="" class="btn btn-block btn-lg bg-white mt-4" lay-filter="signin">注册</button>
                     </form>
                   </div>
                 </div>
@@ -77,7 +80,11 @@
           data = data.field;
           console.log(data)
           if (data.username == '') {
-            layer.msg('用户名不能为空');
+            layer.msg('电话不能为空');
+            return false;
+          }
+          if (data.email == '') {
+            layer.msg('电话不能为空');
             return false;
           }
           if (data.password == '') {
@@ -91,28 +98,27 @@
             type:'POST',
             data: {
               phone: data.username,
+              email: data.email,
               password: data.password,
             },
             success:
                 function (response) {
-                  layer.msg(response.msg);
                   console.log(response)
                   //code = 1 代表登录成功
-                  if(response.code == "1"){
+                  if(response.code === 0){
                     //上传成功
                     layer.msg(response.msg, {
                       icon : 6,
                       offset : "auto",
                       time : 2000
                     });//提示框
-
                     setTimeout(function(){
                       //带参跳转
-                      window.location.href = "/admin/toFront"
+                      window.location.href = "/front/toFront"
                     }, 1000);
                     return false;
                   }
-                  else if(response.code == "0"){
+                  else if(response.code === 1){
                     layer.msg(response.msg, {
                       icon : 5,
                       offset : "auto",

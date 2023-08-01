@@ -31,14 +31,15 @@ public class WebConfiger implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor()).
+        //registry.addInterceptor(new JWTInterceptor()).
                 addPathPatterns("/**").
-                excludePathPatterns("/security.html","/",
+                excludePathPatterns("/security.html", "/index.html", "/",
                         "/admin/checkcode","/admin/checkcode","/admin/loginWithCode","/admin/sendCode","/admin/send",
                         "/admin/login", "/admin/login","/admin/toSignin","/admin/signIn",
                         "/staff/toSignin", "/staff/save", "/staff/login", "/staff/saveComment",
-                        "/user/**", "/news/**", "/common/**",
+                        "/user/**", "/news/**", "/common/**", "/common/forgetPass",
                         "/front/**","/product/**","/assets/**","/uploads/**",
-                        "/loginwithcode.html", "/signin.html");
+                        "/loginwithcode.html", "/signin.html", "/pass-forget.html");
     }
 
     @Override

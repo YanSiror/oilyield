@@ -9,6 +9,7 @@ import com.example.demo.bean.Staff;
 import com.example.demo.bean.Yield;
 import com.example.demo.services.StaffService;
 import com.example.demo.utils.BloomFilterUtil;
+import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.LayuiUtils;
 import com.example.demo.utils.RedisUtils;
 import com.github.pagehelper.PageInfo;
@@ -23,6 +24,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,6 +63,21 @@ public class StaffController {
     @ResponseBody
     public LayuiUtils<Staff> save(Staff object, HttpServletRequest request){
         System.out.println("save:"+object.toString());
+        //MD5加密 - 对修改的密码进行加密
+//        String md5Password = DigestUtils.md5DigestAsHex(object.getPassword().getBytes());
+//        System.out.println(object.getPassword() + ", " + md5Password);
+//        object.setPassword(md5Password);
+        //验证 邮箱 和 用户名
+        if(staffService.findByEmail(object.getEmail())){
+            return new LayuiUtils<Staff>("该邮箱已存在!", object,1,0);
+        }
+        if(staffService.findByPhone(object.getPhone())){
+            return new LayuiUtils<Staff>("该手机号已存在!", object,1,0);
+        }
+
+
+        //BCrypt 加密
+        object.setPassword(CommonApi.encodePassword(object.getPassword()));
 
         //保存到数据库
         staffService.save(object);
@@ -73,15 +90,22 @@ public class StaffController {
         //添加登录用户
         HttpSession session = request.getSession();
         session.setAttribute("loginUser",object.getName());
-        return new LayuiUtils<Staff>("1", object,1,0);
+        return new LayuiUtils<Staff>("注册成功", object,0,0);
     }
 
     @RequestMapping("/modify")
     @ResponseBody
     @CacheEvict(value = "staffCache", allEntries = true)  //清理 setmeal 缓存下的所有数据
     public LayuiUtils<List<Staff>> modify(Staff staff){
-        System.out.println("modify:"+staff.toString());
+        System.out.println("modify: "+staff.toString());
 
+        //MD5加密 - 对修改的密码进行加密
+//        String md5Password = DigestUtils.md5DigestAsHex(staff.getPassword().getBytes());
+//        System.out.println(staff.getPassword() + ", " + md5Password);
+//        staff.setPassword(md5Password);
+
+        //BCrypt 加密
+        staff.setPassword(CommonApi.encodePassword(staff.getPassword()));
         //更新数据库
         staffService.updateById(staff);
         //保存到 布隆过滤器
@@ -249,6 +273,7 @@ public class StaffController {
         System.out.println(page + "  " + size);
         System.out.println(pageinfo.getRecords());
         System.out.println(pageinfo.toString());
+
 
         //打印封装数据
         LayuiUtils<List<Staff>> result = new LayuiUtils<List<Staff>>("", pageinfo.getRecords(),0,(int)pageinfo.getTotal());

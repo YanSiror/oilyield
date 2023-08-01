@@ -36,19 +36,26 @@
   <div class="layui-form-item">
     <label class="layui-form-label required">年龄</label>
     <div class="layui-input-block">
-      <input type="number" name="age" lay-verify="required" lay-reqtext="年龄不能为空" placeholder="请输入年龄" value="" class="layui-input">
+      <input type="number" name="age" lay-verify="number" lay-reqtext="年龄不能为空" placeholder="请输入年龄" value="" class="layui-input">
     </div>
   </div>
   <div class="layui-form-item">
     <label class="layui-form-label required">手机</label>
     <div class="layui-input-block">
-      <input type="number" name="phone" lay-verify="required" lay-reqtext="手机不能为空" placeholder="请输入手机" value="" class="layui-input">
+      <input type="number" name="phone" lay-verify="phone" lay-reqtext="手机不能为空" placeholder="请输入手机" value="" class="layui-input">
     </div>
   </div>
   <div class="layui-form-item">
     <label class="layui-form-label">职位</label>
     <div class="layui-input-block">
-      <input type="text" name="position" placeholder="请输入职位" value="" class="layui-input">
+      <select name="position" lay-verify="required">
+        <option value=""></option>
+        <option value="P1">P1</option>
+        <option value="P2">P2</option>
+        <option value="P3">P3</option>
+        <option value="P4">P4</option>
+        <option value="P5">P5</option>
+      </select>
     </div>
   </div>
   <div class="layui-form-item">
@@ -65,9 +72,16 @@
   </div>
 
   <div class="layui-form-item">
+    <label for="email" class="layui-form-label">邮箱</label>
+    <div class="layui-input-block">
+      <input type="text" id="email" name="email" lay-verify="email" placeholder="请输入邮箱"  class="layui-input">
+    </div>
+  </div>
+
+  <div class="layui-form-item">
     <label class="layui-form-label required">密码</label>
     <div class="layui-input-block">
-      <input type="number" name="password" lay-verify="required" lay-reqtext="密码不能为空" placeholder="请输入密码" value="" class="layui-input">
+      <input type="number" name="password" lay-reqtext="密码不能为空" placeholder="请输入密码" value="" class="layui-input">
     </div>
   </div>
 
@@ -92,8 +106,8 @@
         type:'post',
         data : $(data.form).serialize(),
         success : function(response) {
-          if (response.code === 1) {
-            layer.msg("注册成功", {icon: 6});
+          if (response.code === 0) {
+            layer.msg(response.msg, {icon: 6});
             setTimeout(function(){
               var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
               parent.layer.close(index);      //关闭弹出层
@@ -102,7 +116,7 @@
                   + window.decodeURIComponent(response.data.name) + "&id=" + window.decodeURIComponent(response.data.id);
             }, 1000);
           } else {
-            layer.msg("登录失败", {icon: 5});
+            layer.msg(response.msg, {icon: 5});
           }
         }
       })

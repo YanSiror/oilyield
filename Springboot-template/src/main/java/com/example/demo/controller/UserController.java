@@ -8,6 +8,7 @@ import com.example.demo.bean.Admin;
 import com.example.demo.bean.Staff;
 import com.example.demo.bean.User;
 import com.example.demo.services.UserService;
+import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.LayuiUtils;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ public class UserController {
     @ResponseBody
     public LayuiUtils<List<User>> save(User object){
         System.out.println("save:"+object.toString());
+        //BCrypt 加密
+        object.setPassword(CommonApi.encodePassword(object.getPassword()));
         userService.save(object);
         //打印封装数据
         LayuiUtils<List<User>> result = new LayuiUtils<List<User>>("1", null,1,0);
@@ -53,6 +56,9 @@ public class UserController {
     @ResponseBody
     public LayuiUtils<List<User>> modify(User user){
         System.out.println("modify:"+user.toString());
+        //BCrypt 加密
+        user.setPassword(CommonApi.encodePassword(user.getPassword()));
+        //更新数据库
         userService.updateById(user);
         //打印封装数据
         LayuiUtils<List<User>> result = new LayuiUtils<List<User>>("1", null,1,0);
@@ -156,6 +162,17 @@ public class UserController {
     @ResponseBody
     public LayuiUtils<User> signIn(User user1, Model model, HttpServletRequest request, HttpServletResponse response){
         System.out.println("save:" + user1.toString());
+
+        //验证 邮箱 和 用户名
+        if(userService.findByEmail(user1.getEmail())){
+            return new LayuiUtils<User>("该邮箱已存在!", user1,1,0);
+        }
+        if(userService.findByPhone(user1.getPhone())){
+            return new LayuiUtils<User>("该手机号已存在!", user1,1,0);
+        }
+
+        //BCrypt 加密
+        user1.setPassword(CommonApi.encodePassword(user1.getPassword()));
         userService.save(user1);
         System.out.println(user1.toString());
 
@@ -169,7 +186,6 @@ public class UserController {
             // create a cookie
             Cookie cookie1 = new Cookie("username", user.getPhone());
             Cookie cookie2 = new Cookie("token", Integer.toString(user.getId()));
-
             cookie1.setMaxAge(60 * 10);
             cookie1.setPath("/");
             cookie1.setMaxAge(60 * 10);
@@ -178,9 +194,9 @@ public class UserController {
             System.out.println("cookie2" + cookie2.getName() + cookie2.getValue());
             response.addCookie(cookie1);
             response.addCookie(cookie2);
-            return new LayuiUtils<User>("登录成功", user, 1, 0);
+            return new LayuiUtils<User>("注册成功", user, 0, 0);
         }
-        return new LayuiUtils<User>("注册失败", null,0,0);
+        return new LayuiUtils<User>("注册失败", null,1,0);
     }
     
 }

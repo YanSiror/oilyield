@@ -40,6 +40,7 @@
                         <input name="password" type="password" class="form-control" id="input_password" placeholder="Password">
                       </div>
                       <button class="btn btn-block btn-lg bg-white mt-4"  lay-submit="" lay-filter="login">登录</button>
+                      <a class="text-white c-white animated" style="float:left; margin-top: 15px" onclick="forgetPass()">忘记密码</a>
                     </form>
 
                   </div>
@@ -52,6 +53,22 @@
     </main>
 
     <script>
+      function forgetPass(){
+        //使用验证码登录
+        index = layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/common/toForgetPass',
+          area: ['32%', '40%'],
+          fixed: false, // 不固定
+          maxmin: true,
+          shadeClose: true,
+          title: '忘记密码',
+          offset: 'auto',
+          id: 'forgetPass' //设定一个id，防止重复弹出
+        });
+      }
+
       layui.use(['form'], function () {
         var form = layui.form,
             layer = layui.layer;

@@ -16,7 +16,6 @@ import java.util.Date;
  */
 @TableName("staff")
 public class Staff implements Serializable {
-    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;             //编号
     private String name;        //名字
     private String sex;         //性别

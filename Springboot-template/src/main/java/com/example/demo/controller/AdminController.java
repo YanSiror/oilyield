@@ -4,19 +4,20 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.demo.bean.Admin;
 import com.example.demo.bean.Mail;
 import com.example.demo.bean.Staff;
+import com.example.demo.bean.User;
 import com.example.demo.services.AdminService;
 import com.example.demo.services.ProducerService;
 import com.example.demo.services.StaffService;
-import com.example.demo.utils.CommonApi;
-import com.example.demo.utils.FileUploadUtils;
-import com.example.demo.utils.FtpFileUtil;
-import com.example.demo.utils.LayuiUtils;
+import com.example.demo.utils.*;
+import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -81,8 +82,6 @@ public class AdminController {
 
     @RequestMapping("/toSignin")
     public String toSignin(String email, Model model){
-        System.out.println(email);
-        model.addAttribute("email", email);
         return "signin";
     }
 
@@ -108,27 +107,30 @@ public class AdminController {
         System.out.println(admin.toString());
         System.out.println(type);
 
-        if(admin == null) {
-            //打印封装数据
-            return new LayuiUtils<Admin>("null", null,0,0);
-        }
-
-
+        //MD5加密
+//        String md5Password = DigestUtils.md5DigestAsHex(admin.getPassword().getBytes());
+//        System.out.println(admin.getPassword() + ", " + md5Password);
+//        admin.setPassword(md5Password);
         Admin user = new Admin();
+        boolean isValid = false;
         if(Integer.parseInt(type) == 0){
             //根据类型判断登录
             LambdaQueryWrapper<Admin> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Admin::getUsername,admin.getUsername());
-            queryWrapper.eq(Admin ::getPassword,admin.getPassword());
             user = adminService.getOne(queryWrapper);
+            if(user != null){
+                isValid = CommonApi.validatePassword(admin, user.getPassword());
+                System.out.println(isValid);
+            }
         } else if(Integer.parseInt(type) == 1){
-            //根据类型判断登录
             LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(Staff::getId, Integer.parseInt(admin.getUsername()));
-            queryWrapper.eq(Staff ::getPassword, admin.getPassword());
             Staff staff = staffService.getOne(queryWrapper);
             if(staff == null){
                 return new LayuiUtils<Admin>("请检查身份设置", user,0,0);
+            } else {
+                isValid = CommonApi.validatePassword(admin, staff.getPassword());
+                System.out.println(isValid);
             }
             System.out.println(staff.toString());
             user.setUsername(staff.getName());
@@ -150,7 +152,7 @@ public class AdminController {
         if(checkCode == null){
             result = new LayuiUtils<Admin>("无验证码信息", user,0,0);
         }
-        else if(user == null) {
+        else if(!isValid) {
             //打印封装数据
             result = new LayuiUtils<Admin>("用户名或密码错误", null,0,0);
             return result;
@@ -163,6 +165,10 @@ public class AdminController {
         else {
             //打印封装数据
             session.setAttribute("loginUser",admin.getUsername());
+
+//            String tocken = JWTUtils.getToken(admin);       //设置 JWT token, 用于验证登录
+//            model.addAttribute("userTocken", tocken);
+
             model.addAttribute("admin", admin);
             if(Integer.parseInt(type) == 0){
                 result = new LayuiUtils<Admin>("登录成功", user,1,0);
@@ -269,6 +275,11 @@ public class AdminController {
 
     @RequestMapping("/modify")
     public void modify(Admin admin){
+        //MD5加密 - 对修改的密码进行加密
+        //admin.setPassword(DigestUtils.md5DigestAsHex(admin.getPassword().getBytes()));
+
+        //BCrypt 加密
+        admin.setPassword(CommonApi.encodePassword(admin.getPassword()));
         System.out.println("controller"+ admin.toString());
         adminService.updateById(admin);
     }
@@ -287,14 +298,38 @@ public class AdminController {
     @RequestMapping("/signIn")
     @ResponseBody
     public LayuiUtils<Admin> signIn(Admin admin,Model model, HttpServletRequest request){
-        admin.setHeader("C:\\headers\\1.jpg");
+        Random random = new Random();
+        int number = random.nextInt(40) + 1;
+        System.out.println(admin);
+        System.out.println(admin.toString());
+        admin.setHeader(Integer.toString(number) + ".jpg");
+
+        //使用 SpringSecurity 提供的 BCryptPasswordEncoder 进行加密
+//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//        String encodePass = passwordEncoder.encode(admin.getPassword());
+//        System.out.println(admin.getPassword() + ", " + encodePass);
+//        admin.setPassword(encodePass);
+
+        // md5 加密
+//        String md5Password = DigestUtils.md5DigestAsHex(admin.getPassword().getBytes());
+//        System.out.println(admin.getPassword() + ", " + md5Password);
+//        admin.setPassword(md5Password);
+
+        //验证 邮箱 和 用户名
+        if(adminService.findByEmail(admin.getEmail())){
+            return new LayuiUtils<Admin>("该邮箱已存在!", admin,1,0);
+        }
+
+        //BCrypt 加密
+        admin.setPassword(CommonApi.encodePassword(admin.getPassword()));
+
         adminService.save(admin);
         System.out.println(admin.toString());
         //打印封装数据
         HttpSession session = request.getSession();
         session.setAttribute("loginUser",admin.getUsername());
         model.addAttribute("admin", admin);
-        return new LayuiUtils<Admin>("注册成功", admin,1,0);
+        return new LayuiUtils<Admin>("注册成功", admin,0,0);
     }
 
     @PostMapping("send")

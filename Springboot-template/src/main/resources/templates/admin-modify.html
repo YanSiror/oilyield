@@ -93,7 +93,7 @@
         <div class="layui-form-item">
             <label for="email" class="layui-form-label">邮箱</label>
             <div class="layui-input-block">
-                <input type="text" id="email" name="email" required class="layui-input" th:value="${admin.email}">
+                <input type="text" id="email" lay-verify="email" name="email" required class="layui-input" th:value="${admin.email}">
             </div>
         </div>
 

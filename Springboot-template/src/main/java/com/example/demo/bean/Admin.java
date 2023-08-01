@@ -10,10 +10,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
  * @author: JingYan
  * @Time 18/3/2023
  */
-@TableName("admin")
 public class Admin {
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    private int id;
     private String username;
     private String password;
     private String email;
@@ -25,7 +23,7 @@ public class Admin {
     public Admin() {
     }
 
-    public Admin(Integer id, String username, String password, String email, String header) {
+    public Admin(int id, String username, String password, String email, String header) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -38,14 +36,14 @@ public class Admin {
         this.password = password;
     }
 
-    public Admin(Integer id, String username, String password, String email) {
+    public Admin(int id, String username, String password, String email) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
     }
 
-    public Admin(Integer id, String header) {
+    public Admin(int id, String header) {
         this.id = id;
         this.header = header;
     }
@@ -65,7 +63,7 @@ public class Admin {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 

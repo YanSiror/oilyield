@@ -1,7 +1,9 @@
 package com.example.demo.services.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.demo.bean.Staff;
+import com.example.demo.bean.User;
 import com.example.demo.mapper.StaffMapper;
 import com.example.demo.services.StaffService;
 import com.example.demo.utils.RedisUtils;
@@ -43,5 +45,19 @@ public class StaffServiceImpl extends ServiceImpl<StaffMapper, Staff> implements
             this.removeById(Integer.parseInt(ids));
             redisUtils.delete("staffCache::" + ids);
         }
+    }
+
+    @Override
+    public Boolean findByEmail(String email) {
+        LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<Staff>();
+        queryWrapper.eq(Staff::getEmail,email);
+        return this.getOne(queryWrapper) != null;
+    }
+
+    @Override
+    public Boolean findByPhone(String phone) {
+        LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<Staff>();
+        queryWrapper.eq(Staff::getPhone,phone);
+        return this.getOne(queryWrapper) != null;
     }
 }

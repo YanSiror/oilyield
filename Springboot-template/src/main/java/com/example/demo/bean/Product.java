@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
  */
 @TableName("product")
 public class Product {
-    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;          //编号
     private String name;    //产品名
     private Double price;     //产品价格
