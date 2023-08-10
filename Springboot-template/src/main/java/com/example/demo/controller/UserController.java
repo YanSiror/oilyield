@@ -5,20 +5,19 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.demo.bean.Admin;
+import com.example.demo.bean.Comment;
 import com.example.demo.bean.Staff;
 import com.example.demo.bean.User;
 import com.example.demo.services.UserService;
 import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.LayuiUtils;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.suggest.Completion;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.Cookie;
@@ -36,11 +35,12 @@ import java.util.List;
  */
 @RequestMapping("/user")
 @Controller
+@Api(tags = "用户")
 public class UserController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<List<User>> save(User object){
         System.out.println("save:"+object.toString());
@@ -52,7 +52,7 @@ public class UserController {
         return result;
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     public LayuiUtils<List<User>> modify(User user){
         System.out.println("modify:"+user.toString());
@@ -66,7 +66,7 @@ public class UserController {
     }
 
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -79,7 +79,7 @@ public class UserController {
         return mv;
     }
 
-    @RequestMapping("/seeData/{id}")
+    @GetMapping("/seeData/{id}")
     public ModelAndView seeData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -92,7 +92,20 @@ public class UserController {
         return mv;
     }
 
-    @RequestMapping("/delete")
+    /**
+     * 用户删除
+     * @param ids
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/deleteSelected")
+    @ResponseBody
+    public LayuiUtils<List<User>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
+        userService.deleteSelected(ids);
+        return new LayuiUtils<List<User>>("1", null,1,0);
+    }
+
+    @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<User>> delete(@RequestParam(name="id",required = true)String id) {
         System.out.println("delete:"+id);
@@ -102,12 +115,12 @@ public class UserController {
         return result;
     }
 
-    @RequestMapping("/toList")
+    @GetMapping("/toList")
     public String toList(){
         return "user-list";
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "user-add";
     }
@@ -118,7 +131,7 @@ public class UserController {
      * @param size
      * @return
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public LayuiUtils<List<User>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {
         ModelAndView mv = new ModelAndView();
@@ -138,7 +151,7 @@ public class UserController {
         return result;
     }
 
-    @RequestMapping("/search")
+    @GetMapping("/search")
     @ResponseBody
     public LayuiUtils<List<User>> search(String name, String position){
         System.out.println("search:"+name + position);
@@ -158,7 +171,7 @@ public class UserController {
         return result;
     }
 
-    @RequestMapping("/signIn")
+    @GetMapping("/signIn")
     @ResponseBody
     public LayuiUtils<User> signIn(User user1, Model model, HttpServletRequest request, HttpServletResponse response){
         System.out.println("save:" + user1.toString());

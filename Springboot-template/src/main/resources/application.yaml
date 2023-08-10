@@ -1,6 +1,8 @@
 server:
   port: 8081
 spring:
+  profiles:
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/oilyield?useSSL=true&useUnicode=true&characterEncoding=UTF8&serverTimezone=Asia/Shanghai
@@ -32,6 +34,9 @@ spring:
       time-to-live: 1800000 #设置缓存过期时间
   elasticsearch:
     uris: 127.0.0.1:9200
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
   rabbitmq:
     port: 5672
     host: localhost
@@ -59,5 +64,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+swagger:
+  enabled: true
 
 

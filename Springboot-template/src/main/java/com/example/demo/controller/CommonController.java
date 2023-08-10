@@ -6,11 +6,13 @@ import com.example.demo.services.*;
 import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.FileUploadUtils;
 import com.example.demo.utils.LayuiUtils;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,7 @@ import java.util.Map;
  */
 @RequestMapping("/common")
 @Controller
+@Api(tags = "通用")
 public class CommonController {
     @Autowired
     private AdminService adminService;
@@ -53,7 +56,7 @@ public class CommonController {
      * @param request
      * @return
      */
-    @RequestMapping("/toForgetPass")
+    @GetMapping("/toForgetPass")
     public String toForgetPass(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
@@ -67,7 +70,7 @@ public class CommonController {
      * @param request
      * @return
      */
-    @RequestMapping("/toPassRequest")
+    @GetMapping("/toPassRequest")
     public String toPassRequest(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
@@ -80,7 +83,7 @@ public class CommonController {
      * @param email
      * @return
      */
-    @RequestMapping("/checkEmail")
+    @PostMapping("/checkEmail")
     @ResponseBody
     public LayuiUtils<Staff> checkEmail(String email) {
         return new LayuiUtils<Staff>("未知错误!", null,1,0);
@@ -93,7 +96,7 @@ public class CommonController {
      * @param pass
      * @return
      */
-    @RequestMapping("/passRequest")
+    @PostMapping("/passRequest")
     @ResponseBody
     public LayuiUtils<Staff> passRequestStaff(String email, String phone, String pass) {
         System.out.println(email + phone + pass);
@@ -132,7 +135,7 @@ public class CommonController {
      * @param request
      * @return
      */
-    @RequestMapping("/forgetPass")
+    @PostMapping("/forgetPass")
     @ResponseBody
     public LayuiUtils<Staff> forgetPass(String email, String code, String pass, Model model, HttpServletRequest request) {
         System.out.println(email + code + pass);
@@ -171,7 +174,7 @@ public class CommonController {
         return new LayuiUtils<Staff>("未知错误!", null,1,0);
     }
 
-    @RequestMapping("/toPassCheck")
+    @GetMapping("/toPassCheck")
     public String toPassCheck(String id, String status, Model model, HttpServletRequest request){
         System.out.println("id:" + id);
         Map<String, String> map = CommonApi.getCookie(request);

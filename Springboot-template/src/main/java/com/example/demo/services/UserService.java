@@ -13,6 +13,12 @@ import com.example.demo.bean.User;
  */
 public interface UserService extends IService<User> {
     /**
+     * 删除所有 id
+     * @param ids
+     */
+    void deleteSelected(String ids);
+
+    /**
      * 根据邮箱查找
      * @param email
      * @return

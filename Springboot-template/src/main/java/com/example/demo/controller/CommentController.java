@@ -9,13 +9,11 @@ import com.example.demo.bean.Comment;
 import com.example.demo.services.CommentService;
 import com.example.demo.utils.LayuiUtils;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -28,11 +26,12 @@ import java.util.List;
  */
 @RequestMapping("/comment")
 @Controller
+@Api(tags = "评论")
 public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<List<Comment>> save(Comment object){
         System.out.println("save:"+object.toString());
@@ -42,7 +41,7 @@ public class CommentController {
         return result;
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     public LayuiUtils<List<Comment>> modify(Comment object){
         System.out.println("modify:"+object.toString());
@@ -58,7 +57,7 @@ public class CommentController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/deleteSelected")
+    @GetMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<Comment>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
         commentService.deleteSelected(ids);
@@ -67,7 +66,7 @@ public class CommentController {
         return result;
     }
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -80,7 +79,7 @@ public class CommentController {
         return mv;
     }
 
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<Comment>> delete(@RequestParam(name="id",required = true)String id) {
         System.out.println("delete:"+id);
@@ -90,14 +89,14 @@ public class CommentController {
         return result;
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "comment-add";
     }
 
 
-    @RequestMapping("/toList")
-    public String toList(Admin admin, Model model, HttpSession session){
+    @GetMapping("/toList")
+    public String toList(){
         return "comment-list";
     }
 
@@ -107,7 +106,7 @@ public class CommentController {
      * @param size
      * @return
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public LayuiUtils<List<Comment>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {
         ModelAndView mv = new ModelAndView();
@@ -127,7 +126,7 @@ public class CommentController {
         return result;
     }
 
-    @RequestMapping("/search")
+    @GetMapping("/search")
     @ResponseBody
     public LayuiUtils<List<Comment>> search(String name, String position){
         System.out.println("search:"+name + position);

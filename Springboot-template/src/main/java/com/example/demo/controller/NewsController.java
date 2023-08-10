@@ -10,13 +10,11 @@ import com.example.demo.bean.Staff;
 import com.example.demo.services.NewsService;
 import com.example.demo.utils.LayuiUtils;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -29,11 +27,12 @@ import java.util.List;
  */
 @RequestMapping("/news")
 @Controller
+@Api(tags = "新闻")
 public class NewsController {
     @Autowired
     private NewsService newsService;
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<List<Staff>> save(News object){
         System.out.println("save:"+object.toString());
@@ -44,7 +43,7 @@ public class NewsController {
     }
     
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     public LayuiUtils<List<Staff>> modify(News staff){
         System.out.println("modify:"+staff.toString());
@@ -55,7 +54,7 @@ public class NewsController {
     }
 
     //产品删除
-    @RequestMapping("/deleteSelected")
+    @GetMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<Staff>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
         newsService .deleteSelected(ids);
@@ -64,7 +63,7 @@ public class NewsController {
         return result;
     }
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -78,7 +77,7 @@ public class NewsController {
     }
 
 
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<Staff>> delete(@RequestParam(name="id",required = true)String id) {
         System.out.println("delete:"+id);
@@ -88,18 +87,18 @@ public class NewsController {
         return result;
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "news-add";
     }
 
-    @RequestMapping("/toList")
+    @GetMapping("/toList")
     public String toList(Admin admin, Model model, HttpSession session){
         return "news-list";
     }
 
     //采用分页代码方法
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public LayuiUtils<List<News>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {
         ModelAndView mv = new ModelAndView();
@@ -120,7 +119,7 @@ public class NewsController {
     }
 
     //采用分页代码方法
-    @RequestMapping("/list_news")
+    @GetMapping("/list_news")
     @ResponseBody
     public LayuiUtils<List<News>> list_news(@RequestParam(name="page",required = true,defaultValue = "1")int page, @RequestParam(name="limit",required = true,defaultValue = "3")int limit) {
         ModelAndView mv = new ModelAndView();
@@ -141,7 +140,7 @@ public class NewsController {
         return result;
     }
 
-    @RequestMapping("/search")
+    @GetMapping("/search")
     @ResponseBody
     public LayuiUtils<List<News>> search(String name, String position){
         System.out.println("search:"+name + position);

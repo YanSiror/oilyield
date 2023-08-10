@@ -210,7 +210,7 @@
             }},
           {field: 'ptime', minWidth: 50, title: '生产时间', sort: true},
           {
-            fixed: 'right', field: 'status', minWidth: 50, title: '异常状态', sort: false, templet: function (d) {
+            field: 'status', minWidth: 50, title: '异常状态', sort: false, templet: function (d) {
               if (d.status === 0) {
                 return ' <span class="layui-badge">异常</span>';
               } else if (d.status === 1) {
@@ -273,7 +273,7 @@
           endDate: endDate
         }
         , url: '/yield/search'//后台做模糊搜索接口路径
-        , method: 'post'
+        , method: 'GET'
       });
       return false;//false：阻止表单跳转  true：表单跳转
     });
@@ -313,7 +313,7 @@
       else if (obj.event === 'delete') {  // 监听删除操作
         var checkStatus = table.checkStatus('currentTableId')
             , data = checkStatus.data;
-        layer.alert(JSON.stringify(data));
+        //layer.alert(JSON.stringify(data));
 
         var ids = "";
         for (var x in data) {

@@ -153,10 +153,9 @@
         }
         , where: {//这里传参  向后台
           name: name,
-          position: position
         }
         , url: '/well/search'//后台做模糊搜索接口路径
-        , method: 'post'
+        , method: 'GET'
       });
       return false;//false：阻止表单跳转  true：表单跳转
     });
@@ -181,7 +180,7 @@
       } else if (obj.event === 'delete') {  // 监听删除操作
         var checkStatus = table.checkStatus('currentTableId')
             , data = checkStatus.data;
-        layer.alert(JSON.stringify(data));
+        //layer.alert(JSON.stringify(data));
 
         var ids = "";
         for (var x in data) {
@@ -200,7 +199,8 @@
                   if(response.msg == "1"){
                     layer.msg("删除成功", {icon: 6});
                     setTimeout(function(){
-                      layui.table.reload('currentTableId'); // 重新加载表格
+                      layui.table.reload('currentTableId');
+
                     }, 1000);
                   } else{
                     layer.msg("删除失败", {icon: 5});

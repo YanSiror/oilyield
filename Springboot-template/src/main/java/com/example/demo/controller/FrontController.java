@@ -10,13 +10,12 @@ import com.example.demo.services.UserService;
 import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.DateUtils;
 import com.example.demo.utils.LayuiUtils;
+import io.swagger.annotations.Api;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.Cookie;
@@ -33,6 +32,7 @@ import java.util.Map;
  */
 @RequestMapping("/front")
 @Controller
+@Api(tags = "前台")
 public class FrontController {
     @Autowired
     private StaffService staffService;
@@ -43,18 +43,21 @@ public class FrontController {
     @Autowired
     private NewsService newsService;
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     @ResponseBody
     public LayuiUtils<User> login(Admin admin, Model model, HttpServletResponse response){
         System.out.println(admin.toString());
         //根据类型判断登录
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getPhone, admin.getUsername());
-        queryWrapper.eq(User ::getPassword, admin.getPassword());
         User user = userService.getOne(queryWrapper);
+        if(user == null){
+            return new LayuiUtils<User>("用户不存在", null,0,0);
+        }
+        boolean isValid = CommonApi.validatePassword(admin, user.getPassword());
 
-        if(user == null) {
-            return new LayuiUtils<User>("用户名或密码错误", null,0,0);
+        if(!isValid){
+            return new LayuiUtils<User>("密码错误", null,0,0);
         } else {
             //打印封装数据
             model.addAttribute("user", user);
@@ -80,7 +83,7 @@ public class FrontController {
      * @param request
      * @return
      */
-    @RequestMapping("/toFront")
+    @GetMapping("/toFront")
     public String toFront(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
@@ -94,7 +97,7 @@ public class FrontController {
      * @param request
      * @return
      */
-    @RequestMapping("/toHeader")
+    @GetMapping("/toHeader")
     public String toHeader(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
 
@@ -103,7 +106,7 @@ public class FrontController {
         return "front/header";
     }
 
-    @RequestMapping("/toAbout")
+    @GetMapping("/toAbout")
     public String toAbout(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
 
@@ -112,7 +115,7 @@ public class FrontController {
         return "front/about";
     }
 
-    @RequestMapping("/toInfor")
+    @GetMapping("/toInfor")
     public String toInfor(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
 
@@ -121,7 +124,7 @@ public class FrontController {
         return "front/infor";
     }
 
-    @RequestMapping("/toNewsShow/{id}")
+    @GetMapping("/toNewsShow/{id}")
     public ModelAndView toNewsShow(@PathVariable("id") int id, Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
@@ -139,7 +142,7 @@ public class FrontController {
         return mv;
     }
 
-    @RequestMapping("/toPaper")
+    @GetMapping("/toPaper")
     public String toPaper(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
@@ -147,7 +150,7 @@ public class FrontController {
         return "front/paper";
     }
 
-    @RequestMapping("/toNews")
+    @GetMapping("/toNews")
     public String toNews(Model model, HttpServletRequest request){
         Map<String, String> map = CommonApi.getCookie(request);
         System.out.println("map:" + map.toString());
@@ -155,7 +158,7 @@ public class FrontController {
         return "front/news";
     }
 
-    @RequestMapping("/toContact")
+    @GetMapping("/toContact")
     public String toContact(Model model, HttpServletRequest request){
         List<Staff> staffs = staffService.list();
         Map<String, String> map = CommonApi.getCookie(request);
@@ -165,12 +168,12 @@ public class FrontController {
         return "front/contact";
     }
 
-    @RequestMapping("/toSigns")
+    @GetMapping("/toSigns")
     public String toSigns(){
         return "front/signin";
     }
 
-    @RequestMapping("/toLogin")
+    @GetMapping("/toLogin")
     public ModelAndView toLogin(){
         //设置视图
         ModelAndView mv = new ModelAndView();
@@ -178,7 +181,7 @@ public class FrontController {
         return mv;
     }
 
-    @RequestMapping("/changeUser")
+    @GetMapping("/changeUser")
     public ModelAndView changeUser(HttpServletRequest request, HttpServletResponse response){
         //设置视图
         ModelAndView mv = new ModelAndView();
@@ -195,7 +198,7 @@ public class FrontController {
         return mv;
     }
 
-    @RequestMapping("/saveComment")
+    @PostMapping("/saveComment")
     @ResponseBody
     public LayuiUtils<Comment> save(Comment object){
         System.out.println("save:"+object.toString());

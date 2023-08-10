@@ -39,6 +39,8 @@ public class WebConfiger implements WebMvcConfigurer {
                         "/staff/toSignin", "/staff/save", "/staff/login", "/staff/saveComment",
                         "/user/**", "/news/**", "/common/**", "/common/forgetPass",
                         "/front/**","/product/**","/assets/**","/uploads/**",
+                        //放行 Swagger 3
+                        "/swagger-resources/**","/swagger-ui/**", "/v3/**", "/error",
                         "/loginwithcode.html", "/signin.html", "/pass-forget.html");
     }
 

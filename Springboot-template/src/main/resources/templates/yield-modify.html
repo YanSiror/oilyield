@@ -36,7 +36,7 @@
   <div class="layui-form-item">
     <label class="layui-form-label required">单井名称</label>
     <div class="layui-input-block">
-      <input type="number" name="wname" lay-reqtext="单井名称不能为空" placeholder="请输入单井名称" value="" class="layui-input">
+      <input type="text" name="wname" lay-reqtext="单井名称不能为空" placeholder="请输入单井名称" value="" class="layui-input">
     </div>
   </div>
   <div class="layui-form-item">
@@ -119,7 +119,7 @@
       console.log(data)
       $.ajax({
         url:'/yield/modify',
-        type:'post',
+        type:'PUT',
         data : $(data.form).serialize(),
         success:function (response) {
           if(response.msg == '1'){

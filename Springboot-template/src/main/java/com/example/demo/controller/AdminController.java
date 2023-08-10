@@ -9,6 +9,7 @@ import com.example.demo.services.AdminService;
 import com.example.demo.services.ProducerService;
 import com.example.demo.services.StaffService;
 import com.example.demo.utils.*;
+import io.swagger.annotations.Api;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,7 @@ import java.util.Random;
  */
 @RequestMapping("/admin")
 @Controller
+@Api(tags = "管理员")
 public class AdminController {
     @Autowired
     private AdminService adminService;
@@ -59,28 +61,28 @@ public class AdminController {
 
     String filePath = String.valueOf(Paths.get(FileUploadUtils.realPath, "headers"));
 
-    @RequestMapping("/toMain")
+    @GetMapping("/toMain")
     public String toMain(Admin admin, Model model){
         System.out.println(admin);
         model.addAttribute("admin", admin);
         return "main-admin";
     }
 
-    @RequestMapping("/toStaffMain")
+    @GetMapping("/toStaffMain")
     public String toStaffMain(Admin admin, Model model){
         System.out.println(admin);
         model.addAttribute("admin", admin);
         return "main-staff";
     }
 
-    @RequestMapping("/toHeader")
+    @GetMapping("/toHeader")
     public String toHeader(String id, Model model){
         System.out.println(id);
         model.addAttribute("id", id);
         return "upload-header";
     }
 
-    @RequestMapping("/toSignin")
+    @GetMapping("/toSignin")
     public String toSignin(String email, Model model){
         return "signin";
     }
@@ -90,8 +92,7 @@ public class AdminController {
      * @param request
      * @return
      */
-    @RequestMapping("/logout")
-    @ResponseBody
+    @GetMapping("/logout")
     public ModelAndView logout(HttpServletRequest request){
         ModelAndView mv = new ModelAndView();
         //清理Session中保存的当前登录员工的id
@@ -100,7 +101,7 @@ public class AdminController {
         return mv;
     }
 
-    @RequestMapping("/login")
+    @PostMapping("/login")
     @ResponseBody
     public LayuiUtils<Admin> login(Admin admin,Model model, HttpServletRequest request){
         String type = request.getParameter("type");
@@ -186,7 +187,7 @@ public class AdminController {
      * @param adminId
      * @return ModelAndView
      */
-    @RequestMapping("/list/{adminId}")
+    @GetMapping("/list/{adminId}")
     public ModelAndView list(@PathVariable("adminId") int adminId) {
         ModelAndView mv = new ModelAndView();
         //紧跟的第一个select方法被分页
@@ -202,7 +203,7 @@ public class AdminController {
      * @param uploadFile
      * @throws IOException
      */
-    @RequestMapping("/uploadHead")
+    @PostMapping("/uploadHead")
     public void uploadHead(MultipartFile uploadFile) throws IOException{
         // 创建文件路径
         File file = new File(filePath);
@@ -232,7 +233,7 @@ public class AdminController {
      * @param filename
      * @return
      */
-    @RequestMapping("/saveHeader")
+    @PostMapping("/saveHeader")
     @ResponseBody
     public LayuiUtils<Admin> saveHeader(String id, String filename){
         Admin admin = new Admin(Integer.parseInt(id), filename);
@@ -249,7 +250,7 @@ public class AdminController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping("/getHeader")
+    @GetMapping("/getHeader")
     public void getHeader(String id, HttpServletResponse response) throws IOException {
         //服务器通知浏览器不要缓存
         response.setHeader("pragma","no-cache");
@@ -273,8 +274,9 @@ public class AdminController {
         ImageIO.write(image,"PNG",response.getOutputStream());
     }
 
-    @RequestMapping("/modify")
-    public void modify(Admin admin){
+    @PutMapping("/modify")
+    @ResponseBody
+    public LayuiUtils<Admin> modify(Admin admin){
         //MD5加密 - 对修改的密码进行加密
         //admin.setPassword(DigestUtils.md5DigestAsHex(admin.getPassword().getBytes()));
 
@@ -282,9 +284,11 @@ public class AdminController {
         admin.setPassword(CommonApi.encodePassword(admin.getPassword()));
         System.out.println("controller"+ admin.toString());
         adminService.updateById(admin);
+        //打印封装数据
+        return new LayuiUtils<Admin>("修改成功!", admin,0,0);
     }
 
-    @RequestMapping("/loadData/{adminId}")
+    @GetMapping("/loadData/{adminId}")
     public ModelAndView loadData(@PathVariable("adminId") int adminId){
         ModelAndView mv = new ModelAndView();
         Admin admin = adminService.getById(adminId);
@@ -295,7 +299,7 @@ public class AdminController {
         return mv;
     }
 
-    @RequestMapping("/signIn")
+    @PostMapping("/signIn")
     @ResponseBody
     public LayuiUtils<Admin> signIn(Admin admin,Model model, HttpServletRequest request){
         Random random = new Random();
@@ -379,7 +383,7 @@ public class AdminController {
         return msg;
     }
 
-    @RequestMapping("/sendCode")
+    @PostMapping("/sendCode")
     @ResponseBody
     public LayuiUtils<String> sendCode(String mail, HttpServletRequest request) throws MessagingException {
         //根据邮箱判断用户是否存在
@@ -411,7 +415,7 @@ public class AdminController {
         return new LayuiUtils<String>("发送成功", null,1,0);
     }
 
-    @RequestMapping("/loginWithCode")
+    @PostMapping("/loginWithCode")
     @ResponseBody
     public LayuiUtils<Admin> loginWithCode(String email, String code, Model model, HttpServletRequest request){
         //根据邮箱判断用户是否存在
@@ -443,7 +447,7 @@ public class AdminController {
         }
     }
 
-    @RequestMapping("/checkcode")
+    @GetMapping("/checkcode")
     public void checkcode(HttpServletResponse response, HttpServletRequest request) throws IOException {
         ModelAndView mv = new ModelAndView();
 

@@ -14,6 +14,7 @@ import com.example.demo.utils.LayuiUtils;
 import com.example.demo.utils.RedisUtils;
 import com.github.pagehelper.PageInfo;
 import io.lettuce.core.RedisConnectionException;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -25,10 +26,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
@@ -47,6 +45,7 @@ import java.util.Set;
  */
 @RequestMapping("/staff")
 @Controller
+@Api(tags = "职员")
 public class StaffController {
     @Autowired
     private StaffService staffService;
@@ -59,7 +58,7 @@ public class StaffController {
     private final String redisCache = "staff" + "Cache";
     private final String redisPage = "staff" + "Page";
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<Staff> save(Staff object, HttpServletRequest request){
         System.out.println("save:"+object.toString());
@@ -74,8 +73,6 @@ public class StaffController {
         if(staffService.findByPhone(object.getPhone())){
             return new LayuiUtils<Staff>("该手机号已存在!", object,1,0);
         }
-
-
         //BCrypt 加密
         object.setPassword(CommonApi.encodePassword(object.getPassword()));
 
@@ -93,7 +90,7 @@ public class StaffController {
         return new LayuiUtils<Staff>("注册成功", object,0,0);
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     @CacheEvict(value = "staffCache", allEntries = true)  //清理 setmeal 缓存下的所有数据
     public LayuiUtils<List<Staff>> modify(Staff staff){
@@ -119,7 +116,7 @@ public class StaffController {
         return result;
     }
 
-    @RequestMapping("/toMain")
+    @GetMapping("/toMain")
     public String toMain(Admin admin, Model model){
         System.out.println(admin);
         model.addAttribute("admin", admin);
@@ -127,7 +124,7 @@ public class StaffController {
     }
 
     //产品删除
-    @RequestMapping("/deleteSelected")
+    @GetMapping("/deleteSelected")
     @ResponseBody
     @CacheEvict(value = "staffCache", allEntries = true)  //清理 setmeal 缓存下的所有数据
     public LayuiUtils<List<Staff>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
@@ -141,7 +138,7 @@ public class StaffController {
         return result;
     }
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -165,7 +162,7 @@ public class StaffController {
         return mv;
     }
 
-    @RequestMapping("/seeData/{id}")
+    @GetMapping("/seeData/{id}")
     public ModelAndView seeData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -179,7 +176,7 @@ public class StaffController {
     }
 
 
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     @ResponseBody
     @CacheEvict(value = "staffCache", key = "#id", allEntries = true)  //清理 setmeal 缓存下的所有数据
     public LayuiUtils<List<Staff>> delete(@RequestParam(name="id",required = true)String id) {
@@ -197,25 +194,25 @@ public class StaffController {
         return result;
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "staff-add";
     }
 
-    @RequestMapping("/toSignin")
+    @GetMapping("/toSignin")
     public String toSignin(){
         return "signin-staff";
     }
 
 
-    @RequestMapping("/toList")
+    @GetMapping("/toList")
     public String toList(Admin admin, Model model, HttpSession session){
         return "staff-list";
     }
 
 
     //采用分页代码方法
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     @Cacheable(value = "staffPage", key="#page + '_' + #size", condition="#size == 10")
     public LayuiUtils<List<Staff>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {
@@ -280,9 +277,11 @@ public class StaffController {
         return result;
     }
 
-    @RequestMapping("/search")
+    @GetMapping("/search")
     @ResponseBody
-    public LayuiUtils<List<Staff>> search(String name, String position){
+    public LayuiUtils<List<Staff>> search(String name, String position,
+                                          @RequestParam(name="page",required = true,defaultValue = "1")int page,
+                                          @RequestParam(name="limit",required = true,defaultValue = "10")int size){
         System.out.println("search:"+name + position);
         Staff staff = new Staff();
         //设置参数
@@ -291,11 +290,11 @@ public class StaffController {
         LambdaQueryWrapper<Staff> lambdaQueryWrapper = new LambdaQueryWrapper<Staff>();
         lambdaQueryWrapper.like(name != null, Staff::getName,name);
         lambdaQueryWrapper.like(position != null, Staff::getPosition,position);
-        List<Staff> staffList = staffService.list(lambdaQueryWrapper);
-        //使用PageInfo包装数据
-        PageInfo<Staff> pageInfo = new PageInfo<Staff> (staffList,3);
+        //进行分页查询
+        Page<Staff> pageinfo = new Page<Staff>(page, size);
+        staffService.page(pageinfo, lambdaQueryWrapper);
         //打印封装数据
-        LayuiUtils<List<Staff>> result = new LayuiUtils<List<Staff>>("", staffList,0,(int)pageInfo.getTotal());
+        LayuiUtils<List<Staff>> result = new LayuiUtils<List<Staff>>("", pageinfo.getRecords(),0,(int)pageinfo.getTotal());
         System.out.println(JSON.toJSONString(result));
         return result;
     }

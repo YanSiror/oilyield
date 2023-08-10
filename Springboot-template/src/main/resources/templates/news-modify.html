@@ -73,7 +73,7 @@
       console.log("upload", data)
       $.ajax({
         url:'/news/modify',
-        type:'post',
+        type:'PUT',
         data : {
           id: data.id,
           title: data.title,

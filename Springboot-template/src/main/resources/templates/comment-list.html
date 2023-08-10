@@ -116,7 +116,7 @@
           position: position
         }
         , url: '/comment/search'//后台做模糊搜索接口路径
-        , method: 'post'
+        , method: 'get'
       });
       return false;//false：阻止表单跳转  true：表单跳转
     });
@@ -160,8 +160,7 @@
                   if(response.msg == "1"){
                     layer.msg("删除成功", {icon: 6});
                     setTimeout(function(){
-                      //layer.closeAll();//关闭所有的弹出层
-                      window.parent.location.reload();
+                      layui.table.reload('currentTableId'); // 重新加载表格
                     }, 1000);
                   } else{
                     layer.msg("删除失败", {icon: 5});

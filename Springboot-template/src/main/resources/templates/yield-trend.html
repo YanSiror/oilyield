@@ -27,7 +27,7 @@
 <body>
 <div class="container" style="width: 100%">
   <div class="layui-card" style="text-align: center;">
-      <h3><div class="layui-card-header layui-bg-cyan">油井产量分析趋势图</div></h3>
+      <h3><div class="layui-card-header layui-bg-cyan">油井产量趋势分析图</div></h3>
   </div>
 
   <form class="layui-form layuimini-form"  action="" style="margin-left: 30px" lay-filter="linechart">
@@ -187,7 +187,7 @@
             type: 'value',
             scale: true,
             min: 0,
-            max: 40,
+            max: response.max + 3,
             interval: 2
           });
 

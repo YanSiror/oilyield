@@ -44,21 +44,20 @@
                 //监听提交
                 $.ajax({
                     url : '/admin/modify',
-                    type : 'post',
+                    type : 'PUT',
                     data : $(data.form).serialize(),
-                    success : function() {
+                    success : function(response) {
+                      if(response.code === 0){
+                        layer.msg("修改成功", {icon: 6});
+                        setTimeout(function(){
+                          var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
+                          parent.layer.close(index);//关闭弹出层
+                        }, 1000);
+                      } else{
+                        layer.msg("修改失败", {icon: 5});
+                      }
                     }
                 })
-
-                layer.msg('修改成功！', {
-                    icon : 6,
-                    offset : "auto",
-                    time : 1000
-                });//提示框
-                setTimeout(function(){
-                    var index = parent.layer.getFrameIndex(window.name);//获取窗口索引
-                    parent.layer.close(index);//关闭弹出层
-                }, 1000);
                 return false;
             });
         });
@@ -85,7 +84,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label">密码</label>
             <div class="layui-input-block">
-                <input type="text" name="password" required  placeholder="请输入密码" th:value="${admin.password}" class="layui-input" oninput="value=value.replace(/[^\d]/g,'')">
+                <input type="text" name="password" required  placeholder="请输入密码" class="layui-input" oninput="value=value.replace(/[^\d]/g,'')">
             </div>
         </div>
 

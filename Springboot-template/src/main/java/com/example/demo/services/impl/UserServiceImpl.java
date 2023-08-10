@@ -8,6 +8,9 @@ import com.example.demo.services.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  *  服务实现类
@@ -18,6 +21,28 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Override
+    public void deleteSelected(String ids) {
+        if (ids.contains(",")) {
+            String[] split = ids.split(",");
+            List<Integer> list = new ArrayList<Integer>();
+            for (String s : split) {
+                int i = 0;
+                try {
+                    i = Integer.parseInt(s);
+                } catch (NumberFormatException e) {
+
+                }
+                list.add(i);
+            }
+            for (int id : list) {
+                this.removeById(id);
+            }
+        }else {
+            this.removeById(Integer.parseInt(ids));
+        }
+    }
 
     @Override
     public Boolean findByEmail(String email) {

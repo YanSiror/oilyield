@@ -10,14 +10,12 @@ import com.example.demo.services.ProductService;
 import com.example.demo.utils.FileUploadUtils;
 import com.example.demo.utils.LayuiUtils;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -41,13 +39,14 @@ import java.util.List;
  */
 @RequestMapping("/product")
 @Controller
+@Api(tags = "产品")
 public class ProductController {
     @Autowired
     private ProductService productService;
     String filePath = String.valueOf(Paths.get(FileUploadUtils.realPath, "products"));
 
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<List<Product>> save(Product object){
         System.out.println("save:"+object.toString());
@@ -58,13 +57,13 @@ public class ProductController {
         return result;
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     public LayuiUtils<List<Product>> modify(Product product){
         System.out.println("modify:"+product.toString());
         productService.updateById(product);
         //打印封装数据
-        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,1,0);
+        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,0,0);
         return result;
     }
 
@@ -74,16 +73,16 @@ public class ProductController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/deleteSelected")
+    @GetMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<Product>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
         productService.deleteSelected(ids);
         //打印封装数据
-        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,1,0);
+        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,0,0);
         return result;
     }
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
@@ -96,23 +95,23 @@ public class ProductController {
         return mv;
     }
 
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<Product>> delete(@RequestParam(name="id",required = true)String id) {
         System.out.println("delete:"+id);
         productService.deleteSelected(id);
         //打印封装数据
-        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,1,0);
+        LayuiUtils<List<Product>> result = new LayuiUtils<List<Product>>("1", null,0,0);
         return result;
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "product-add";
     }
 
 
-    @RequestMapping("/toList")
+    @GetMapping("/toList")
     public String toList(Admin admin, Model model, HttpSession session){
         return "product-list";
     }
@@ -123,7 +122,7 @@ public class ProductController {
      * @param limit
      * @return
      */
-    @RequestMapping("/list_front")
+    @GetMapping("/list_front")
     @ResponseBody
     public LayuiUtils<List<Product>> listFront(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "3")int limit) {
         ModelAndView mv = new ModelAndView();
@@ -158,7 +157,7 @@ public class ProductController {
      * @param size
      * @return
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public LayuiUtils<List<Product>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "3")int size) {
         ModelAndView mv = new ModelAndView();
@@ -180,10 +179,10 @@ public class ProductController {
         return result;
     }
 
-    @RequestMapping("/search")
+    @GetMapping("/search")
     @ResponseBody
-    public LayuiUtils<List<Product>> search(String name, String position){
-        System.out.println("search:"+name + position);
+    public LayuiUtils<List<Product>> search(String name){
+        System.out.println("search name:  "+name);
         Product product = new Product();
         //设置参数
         product.setName(name);
@@ -204,7 +203,7 @@ public class ProductController {
      * @param filename
      * @return
      */
-    @RequestMapping("/saveHeader")
+    @PostMapping("/saveHeader")
     @ResponseBody
     public LayuiUtils<Product> saveHeader(String id, String filename){
         Product product = productService.getById(id);
@@ -223,7 +222,7 @@ public class ProductController {
      * @param response
      * @throws IOException
      */
-    @RequestMapping("/getHeader")
+    @GetMapping("/getHeader")
     public void getHeader(String id, HttpServletResponse response) throws IOException {
         //服务器通知浏览器不要缓存
         response.setHeader("pragma","no-cache");
@@ -252,9 +251,8 @@ public class ProductController {
      * @param uploadFile
      * @throws IOException
      */
-    @RequestMapping("/uploadHead")
+    @PostMapping("/uploadHead")
     public void uploadHead(MultipartFile uploadFile) throws IOException{
-        //
         //生成文件夹, 如果 module文件夹不存在则创建文件夹
         File file=new File(filePath);
         if(!file.exists()){

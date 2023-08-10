@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.Api;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -58,6 +59,7 @@ import java.util.stream.Collectors;
 
 @RequestMapping("/yield")
 @Controller
+@Api(tags = "产量")
 public class YieldController {
     @Autowired
     private YieldService yieldService;
@@ -80,7 +82,7 @@ public class YieldController {
         return redisTemplate.hasKey(name);
     }
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<List<Yield>> save(Yield object){
         System.out.println("save:"+object.toString());
@@ -90,7 +92,7 @@ public class YieldController {
         return result;
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     public LayuiUtils<List<Yield>> modify(Yield yield){
         System.out.println("modify:"+yield.toString());
@@ -101,7 +103,7 @@ public class YieldController {
     }
 
     //产品删除
-    @RequestMapping("/deleteSelected")
+    @GetMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<Yield>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
         yieldService.deleteSelected(ids);
@@ -110,11 +112,14 @@ public class YieldController {
         return result;
     }
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
+        System.out.println(id);
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
         Yield yield = yieldService.getById(id);
+        yield.setStatus(0);
+
         //设置模型
         mv.addObject("yield", JSON.toJSONString(yield));
         System.out.println(JSON.toJSONString(yield));
@@ -123,7 +128,7 @@ public class YieldController {
         return mv;
     }
 
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<Yield>> delete(@RequestParam(name="id",required = true)String id) {
         System.out.println("delete:"+id);
@@ -133,24 +138,24 @@ public class YieldController {
         return result;
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "yield-add";
     }
 
-    @RequestMapping("/toImport")
+    @GetMapping("/toImport")
     public String toImport(){
         return "yield-import";
     }
 
 
-    @RequestMapping("/toList")
+    @GetMapping("/toList")
     public String toList(Admin admin, Model model, HttpSession session){
         return "yield-list";
     }
 
     //采用分页代码方法
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public LayuiUtils<List<Yield>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,
                                         @RequestParam(name="limit",required = true,defaultValue = "15")int size,
@@ -211,7 +216,7 @@ public class YieldController {
 
 
     //采用分页代码方法
-    @RequestMapping("/listLimit")
+    @PostMapping("/listLimit")
     @ResponseBody
     public LayuiUtils<List<Yield>> listLimit(String name, String startDate,  String endDate, @RequestParam(name="page",required = true,defaultValue = "1")int page,
                                         @RequestParam(name="limit",required = true,defaultValue = "15")int size,
@@ -266,14 +271,14 @@ public class YieldController {
     }
 
     //采用分页代码方法
-    @RequestMapping("/listWarn")
+    @GetMapping("/listWarn")
     public String listWarn(Model model) {
         //打印封装数据
         return "yield-warn";
     }
 
     //采用分页代码方法
-    @RequestMapping("/listAll")
+    @GetMapping("/listAll")
     public String listAll(Model model) {
         List<Well> wells = wellService.list();
         model.addAttribute("wells", wells);
@@ -362,7 +367,7 @@ public class YieldController {
     }
 
     //采用分页代码方法
-    @RequestMapping("/listTrend")
+    @GetMapping("/listTrend")
     public String listTrend(Model model) {
         List<Well> wells = wellService.list();
         model.addAttribute("wells", wells);
@@ -393,6 +398,7 @@ public class YieldController {
         List<Double> rates = new ArrayList<>();
         List<Double> totals = new ArrayList<>();
         List<String> times = new ArrayList<>();
+        double max = 0;
         for (Yield y: yields) {
             if(y.getGas() == null){
                 y.setGas(0.0);
@@ -404,6 +410,12 @@ public class YieldController {
                 y.setRate(0.0);
             }
             double t = y.getLiquid() + y.getWater() + y.getGas() + y.getOil();
+            //求得最大区间
+            max = Math.max(max, y.getLiquid());
+            max = Math.max(max, y.getWater());
+            max = Math.max(max, y.getGas());
+            max = Math.max(max, y.getOil());
+
             //剔除没有产量数据的数据
             if(t == 0){
                 continue;
@@ -424,13 +436,14 @@ public class YieldController {
         map.put("rates", rates);
         map.put("totals", totals);
         map.put("times", times);
+        map.put("max", (int)max);
         //System.out.println(yields.toString());
         model.addAttribute("yields", yields);
         return map;
     }
 
     //采用分页代码方法
-    @RequestMapping("/listAnalyse")
+    @GetMapping("/listAnalyse")
     public String listAnalyse(Model model) {
         List<Well> wells = wellService.list();
         //System.out.println(yields.toString());
@@ -440,7 +453,7 @@ public class YieldController {
     }
 
     //采用分页代码方法
-    @RequestMapping("/listGroup")
+    @GetMapping("/listGroup")
     public String listGroup(Model model) {
         List<Integer> groups = new ArrayList<>();
         Cache cache = cacheManager.getCache("wellgroup");
@@ -846,7 +859,7 @@ public class YieldController {
         return re_maps;
     }
 
-    @RequestMapping("/search")
+    @GetMapping("/search")
     @ResponseBody
     public LayuiUtils<List<Yield>> search(String name, String startDate,  String endDate,
                                           @RequestParam(name="page",required = true,defaultValue = "1")int page,

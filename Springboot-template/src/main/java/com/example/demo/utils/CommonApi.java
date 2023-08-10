@@ -1,13 +1,19 @@
 package com.example.demo.utils;
 
 import com.example.demo.bean.Admin;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.DigestUtils;
-
-import javax.annotation.Resource;
+import org.springframework.core.io.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -15,6 +21,7 @@ import java.util.Random;
 /**
  * @author Jing Yan
  */
+@Slf4j
 public class CommonApi {
     public static Map<String, String> getCookie(HttpServletRequest request){
         Cookie[] cookies = request.getCookies();
@@ -61,4 +68,47 @@ public class CommonApi {
         //有顺序, 左侧为未加密的字符串, 右侧为加密好的数据
         return new BCryptPasswordEncoder().matches(admin.getPassword(), password);
     }
+
+    /**
+     * 读取邮件模板
+     * 替换模板中的信息
+     *
+     * @param title 内容
+     * @return
+     */
+    public static String buildContent(String title) {
+        //加载邮件html模板
+        Resource resource = new ClassPathResource("mailtemplate.ftl");
+        InputStream inputStream = null;
+        BufferedReader fileReader = null;
+        StringBuilder buffer = new StringBuilder();
+        String line = "";
+        try {
+            inputStream = resource.getInputStream();
+            fileReader = new BufferedReader(new InputStreamReader(inputStream));
+            while ((line = fileReader.readLine()) != null) {
+                buffer.append(line);
+            }
+        } catch (Exception e) {
+            log.info("发送邮件读取模板失败{}", e);
+        } finally {
+            if (fileReader != null) {
+                try {
+                    fileReader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        //替换html模板中的参数
+        return MessageFormat.format(buffer.toString(), title);
+    }
+
 }

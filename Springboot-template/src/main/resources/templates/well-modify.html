@@ -92,7 +92,7 @@
       console.log(data)
       $.ajax({
         url:'/well/modify',
-        type:'post',
+        type:'PUT',
         data : $(data.form).serialize(),
         success:function (response) {
           if(response.msg == '1'){

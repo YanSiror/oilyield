@@ -13,14 +13,12 @@ import com.example.demo.services.StaffService;
 import com.example.demo.services.UserService;
 import com.example.demo.utils.CommonApi;
 import com.example.demo.utils.LayuiUtils;
+import io.swagger.annotations.Api;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -32,6 +30,7 @@ import java.util.List;
  */
 @RequestMapping("/passforget")
 @Controller
+@Api(tags = "忘记密码")
 public class PassForgetController {
     @Autowired
     private PassForgetService passforgetService;
@@ -40,7 +39,7 @@ public class PassForgetController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ResponseBody
     public LayuiUtils<List<PassForget>> save(PassForget object){
         System.out.println("save:"+object.toString());
@@ -49,7 +48,7 @@ public class PassForgetController {
         return new LayuiUtils<List<PassForget>>("1", null,1,0);
     }
 
-    @RequestMapping("/modify")
+    @PutMapping("/modify")
     @ResponseBody
     public LayuiUtils<List<PassForget>> modify(PassForget object){
         System.out.println("modify:"+object.toString());
@@ -58,7 +57,7 @@ public class PassForgetController {
         return new LayuiUtils<List<PassForget>>("1", null,1,0);
     }
 
-    @RequestMapping("/agree")
+    @GetMapping("/agree")
     @ResponseBody
     public LayuiUtils<PassForget> agree(String id){
         System.out.println("agree:" + id);
@@ -97,7 +96,7 @@ public class PassForgetController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/deleteSelected")
+    @GetMapping("/deleteSelected")
     @ResponseBody
     public LayuiUtils<List<PassForget>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
         passforgetService.deleteSelected(ids);
@@ -105,7 +104,7 @@ public class PassForgetController {
         return new LayuiUtils<List<PassForget>>("1", null,1,0);
     }
 
-    @RequestMapping("/loadData/{id}")
+    @GetMapping("/loadData/{id}")
     public ModelAndView loadData(@PathVariable("id") int id){
         System.out.println("agree:" + id);
         PassForget passForget = passforgetService.getById(id);
@@ -137,7 +136,7 @@ public class PassForgetController {
         return mv;
     }
 
-    @RequestMapping("/delete")
+    @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<PassForget>> delete(@RequestParam(name="id",required = true)String id) {
         System.out.println("delete:"+id);
@@ -146,13 +145,13 @@ public class PassForgetController {
         return new LayuiUtils<List<PassForget>>("1", null,1,0);
     }
 
-    @RequestMapping("/toAdd")
+    @GetMapping("/toAdd")
     public String toAdd(){
         return "passForget-add";
     }
 
 
-    @RequestMapping("/toList")
+    @GetMapping("/toList")
     public String toList(Admin admin, Model model, HttpSession session){
         return "passForget-list";
     }
@@ -163,7 +162,7 @@ public class PassForgetController {
      * @param size
      * @return
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public LayuiUtils<List<PassForget>> list(@RequestParam(name="page",required = true,defaultValue = "1")int page,@RequestParam(name="limit",required = true,defaultValue = "15")int size) {
         ModelAndView mv = new ModelAndView();
