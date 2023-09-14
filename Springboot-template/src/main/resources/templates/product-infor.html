@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <title>商品详情</title>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
+  <!-- Theme CSS -->
+  <link th:href="@{/assets/css/theme.css}" rel="stylesheet">
+  <link th:href="@{/assets/css/demo.css}" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/assets/css/layui.css}">
+  <link rel="stylesheet" th:href="@{/assets/lib/font-awesome-4.7.0/css/font-awesome.min.css}" media="all">
+  <script th:src="@{/assets/layui.js}"></script>
+</head>
+
+<body>
+<div class="layui-row">
+  <div class="layui-col-md2">
+    <div class="layui-carousel" id="test10" style="float: left;margin-left: 30px">
+      <div carousel-item="">
+        <div><img th:src="@{/product/getHeader(id=${product.id})}" style="width: 100%; height: 100%;"></div>
+        <div><img th:src="@{/product/getHeader(id=${product.id})}" style="width: 100%; height: 100%;"></div>
+        <div><img th:src="@{/product/getHeader(id=${product.id})}" style="width: 100%; height: 100%;"></div>
+      </div>
+    </div>
+<!--    <img th:src="@{/product/getHeader(id=${product.id})}" style="width: 50%; height: 50%;float: left;margin-left: 30px" alt="商品图片" x>-->
+  </div>
+  <div class="layui-col-md3" style="float:left; margin-left: 35px; font-family: '宋体';">
+    <h2 th:text="${product.name}" style="font-weight: bold;"></h2>
+    <div style="width: 100%; height: 100px; background-color: lightgrey;display: flex; flex-direction: column; justify-content: center;">
+      <div style="display: flex; align-items: center;">
+        <span>价  格</span>
+        <p th:text="'¥ ' + ${product.price}" style="font-size: 14pt;font-weight: bold;color: red;margin-left: 20px"></p>
+      </div>
+      <div style="display: flex; align-items: center;margin-top: 10px">
+        <span>促  销</span>
+        <p style="font-size: 14pt;margin-left: 20px">是</p>
+      </div>
+      <div style="display: flex; align-items: center;margin-top: 10px">
+        <span>优惠劵</span>
+        <button type="button" class="layui-btn layui-btn-danger layui-btn-xs" style="margin-left: 10px">满101-100</button>
+        <button type="button" class="layui-btn layui-btn-danger layui-btn-xs" style="margin-left: 10px">满201-100</button>
+        <button type="button" class="layui-btn layui-btn-danger layui-btn-xs" style="margin-left: 10px">满500-299</button>
+      </div>
+    </div>
+    <div style="align-items: center;">
+      <p >商品描述</p>
+      <textarea class="layui-textarea" th:text="${product.infor}" style="margin-top: 10px"></textarea>
+    </div>
+    <div style="align-items: center;margin-top: 10px">
+      <p >参 数</p>
+      <p style="margin-top: 10px">...</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  layui.use(['carousel'], function() {
+    var carousel = layui.carousel;
+
+    // 判断设备屏幕大小
+    var screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    var height = '400px';
+    if (screenWidth <= 768) {
+      height = '200px';
+    } else if (screenWidth <= 480) {
+      height = '150px';
+    }
+
+    carousel.render({
+      elem: '#test10'
+      , width: '50%'
+      , height: height
+      , interval: 5000
+    });
+  });
+</script>
+</body>
+
+</html>

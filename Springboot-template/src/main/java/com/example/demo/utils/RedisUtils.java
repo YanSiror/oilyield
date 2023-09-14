@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +41,16 @@ public class RedisUtils {
             redisTemplate.delete(keys);
         }
     }
+
+    // =========== 锁 ============
+    public Boolean getLock(String key,int time){
+        return redisTemplate.opsForValue().setIfAbsent(key + ":lock", true, Duration.ofSeconds(time));
+    }
+
+    public void removeLock(String key){
+        redisTemplate.delete(key + ":lock");
+    }
+
 
     // ============================String=============================
     /**

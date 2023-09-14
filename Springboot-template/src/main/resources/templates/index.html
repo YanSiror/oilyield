@@ -18,7 +18,7 @@
       body {background-image:url("../assets/images/bg.jpg");height:100%;width:100%;}
       #container{height:100%;width:100%;}
       input:-webkit-autofill {-webkit-box-shadow:inset 0 0 0 1000px #fff;background-color:transparent;}
-      .admin-login-background {width:300px;height:300px;position:absolute;left:50%;top:40%;margin-left:-150px;margin-top:-200px;}
+      .admin-login-background {width:300px;height:300px;position:absolute;left:50%;top:40%;margin-left:-150px;margin-top:-240px;}
       .admin-header {text-align:center;margin-bottom:20px;color:#ffffff;font-weight:bold;font-size:38px}
       .admin-input {border-top-style:none;border-right-style:solid;border-bottom-style:solid;border-left-style:solid;height:50px;width:300px;padding-bottom:0px;}
       .admin-input::-webkit-input-placeholder {color:#a78369}
@@ -58,7 +58,7 @@
 
         <div>
           <input type="text" name="verifycode" th:placeholder="#{login.checkcode}" autocomplete="off" class="layui-input admin-input admin-input-verify" value="">
-          <img class="admin-captcha" width="80" height="30" th:src="@{/admin/checkcode}">
+          <img id="code" class="admin-captcha" width="80" height="30" onclick="refreshCode()" th:src="@{/admin/checkcode}">
         </div>
 
 <!--        <div class="layui-form-item" style="text-align: left;margin-top: 10px">-->
@@ -105,6 +105,34 @@
     </div>
 
     <script>
+      function refreshCode(){
+        // 获取img标签
+        var imgElement = document.getElementById("code");
+
+        // 发送AJAX请求
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/admin/checkcode", true); // 将"/your-backend-endpoint"替换为实际的后端API端点
+        xhr.responseType = "blob"; // 指定响应类型为二进制数据
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var blob = xhr.response;
+
+            // 创建一个URL对象
+            var imgUrl = URL.createObjectURL(blob);
+
+            // 设置img标签的src属性为URL对象
+            imgElement.src = imgUrl;
+
+            // 可选：在图片加载完成后释放URL对象
+            imgElement.onload = function() {
+              URL.revokeObjectURL(imgUrl);
+            };
+          }
+        };
+
+        xhr.send();
+      }
+
       function forgetPass(){
         //使用验证码登录
         index = layer.open({

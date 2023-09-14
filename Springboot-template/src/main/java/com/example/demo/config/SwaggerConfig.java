@@ -48,10 +48,10 @@ public class SwaggerConfig {
         /*作者信息*/
         Contact contact = new Contact("Jing Yan", "https://github.com/YanSiror", "1719831051@qq.com");
         return new ApiInfo(
-                "Spring Boot 集成 Swagger3 测试",
-                "Spring Boot 集成 Swagger3 测试接口文档",
+                "OilYieldSystem 接口文档",
+                "类方法接口文档",
                 "v1.0",
-                "https://github.com/YanSiror",
+                "Github: https://github.com/YanSiror",
                 contact,
                 "Apache 2.0",
                 "http://www.apache.org/licenses/LICENSE-2.0",

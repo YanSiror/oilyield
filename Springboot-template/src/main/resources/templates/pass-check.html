@@ -56,7 +56,9 @@
 <script>
     function sendCode(){
       //设置按钮不可点击
-      document.getElementById("send").disabled = "true";
+      var button = document.getElementById("send");
+      var seconds = 60;
+      button.disabled = "true";
       document.getElementById("send").className = "layui-btn layui-btn-disabled layui-inline";
       var layer = layui.layer;
       //获取开关的值
@@ -80,7 +82,28 @@
             },
             success:function (response) {
                 if(response.code === 0){
-                    layer.msg(response.msg, {icon: 6});
+                  layer.msg(response.msg, {icon: 6});
+
+                  //倒计时
+                  // 将按钮的文本设置为初始秒数
+                  button.value = seconds + " s";
+                  // 创建定时器，每秒更新倒计时
+                  var timer = setInterval(function() {
+                    seconds--;
+                    // 更新按钮文本
+                    button.value = seconds + " s";
+                    // 倒计时结束
+                    if (seconds <= 0) {
+                      // 恢复按钮点击
+                      button.disabled = false;
+                      // 恢复按钮文本
+                      button.value = "发送验证码";
+                      // 清除定时器
+                      clearInterval(timer);
+                    }
+                  }, 1000);
+
+
                   setTimeout(function () {
                     //带参跳转
                     //使用验证码登录

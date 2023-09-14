@@ -76,7 +76,7 @@
           //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
           type:2,
           content:'/common/toPassCheck?id='+id+"&status=0",
-          area: ['40%', '60%'],
+          area: ['35%', '35%'],
           offset: 'auto',
           title: '修改权限校验',
           id: 'modify' //设定一个id，防止重复弹出
@@ -144,6 +144,12 @@
         <li class="layui-nav-item mobile layui-hide-xs" lay-unselect>
           <a href="javascript:;" data-check-screen="full" onclick="goFullscreen()">
             <i class="fa fa-expand" id="ficon"></i>
+          </a>
+        </li>
+
+        <li class="layui-nav-item">
+          <a th:href="@{/swagger-ui/index.html}" target="_blank">
+            <i class="fa fa-bookmark"></i>
           </a>
         </li>
 

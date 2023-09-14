@@ -48,6 +48,11 @@ public class WebConfiger implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/upload/**")
                 .addResourceLocations("file:C:/header/");
+
+        //    告知系统static 当成 静态资源访问
+        String path = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\images\\";
+        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+        registry.addResourceHandler("/images/**").addResourceLocations("file:"+path);
         //下面这个写法得到的值与上面的效果一样
         //.addResourceLocations("file:C:"+System.getProperty("file.separator")+"Pic"+System.getProperty("file.separator"))
     }

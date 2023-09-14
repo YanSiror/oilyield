@@ -15,6 +15,9 @@ import com.example.demo.utils.RedisUtils;
 import com.github.pagehelper.PageInfo;
 import io.lettuce.core.RedisConnectionException;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Time;
+import org.jcp.xml.dsig.internal.SignerOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -34,6 +37,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +50,7 @@ import java.util.Set;
 @RequestMapping("/staff")
 @Controller
 @Api(tags = "职员")
+@Slf4j
 public class StaffController {
     @Autowired
     private StaffService staffService;
@@ -60,12 +65,8 @@ public class StaffController {
 
     @PostMapping("/save")
     @ResponseBody
-    public LayuiUtils<Staff> save(Staff object, HttpServletRequest request){
+    public LayuiUtils<Staff> save(Staff object, HttpServletRequest request) throws InterruptedException {
         System.out.println("save:"+object.toString());
-        //MD5加密 - 对修改的密码进行加密
-//        String md5Password = DigestUtils.md5DigestAsHex(object.getPassword().getBytes());
-//        System.out.println(object.getPassword() + ", " + md5Password);
-//        object.setPassword(md5Password);
         //验证 邮箱 和 用户名
         if(staffService.findByEmail(object.getEmail())){
             return new LayuiUtils<Staff>("该邮箱已存在!", object,1,0);
@@ -75,15 +76,17 @@ public class StaffController {
         }
         //BCrypt 加密
         object.setPassword(CommonApi.encodePassword(object.getPassword()));
-
-        //保存到数据库
+        //一致性策略: 先删缓存, 再更新数据库 + 延时双删
+        redisUtils.delete("staffCache::" + object.getId());
+        redisUtils.clearPageCache("staffPage");
+        //更新数据库
         staffService.save(object);
-        //保存到 redis
-        redisUtils.set("staffCache::" + object.getId(), object);
+        //延时
+        Thread.sleep(200);
+        redisUtils.delete("staffCache::" + object.getId());
+        redisUtils.clearPageCache("staffPage");
         //保存到 布隆过滤器
         bloomFilter.add(Integer.toString(object.getId()));
-        redisUtils.clearPageCache("staffPage");
-
         //添加登录用户
         HttpSession session = request.getSession();
         session.setAttribute("loginUser",object.getName());
@@ -93,23 +96,22 @@ public class StaffController {
     @PutMapping("/modify")
     @ResponseBody
     @CacheEvict(value = "staffCache", allEntries = true)  //清理 setmeal 缓存下的所有数据
-    public LayuiUtils<List<Staff>> modify(Staff staff){
+    public LayuiUtils<List<Staff>> modify(Staff staff) throws InterruptedException {
         System.out.println("modify: "+staff.toString());
-
-        //MD5加密 - 对修改的密码进行加密
-//        String md5Password = DigestUtils.md5DigestAsHex(staff.getPassword().getBytes());
-//        System.out.println(staff.getPassword() + ", " + md5Password);
-//        staff.setPassword(md5Password);
-
         //BCrypt 加密
         staff.setPassword(CommonApi.encodePassword(staff.getPassword()));
+        //一致性策略: 先删缓存, 再更新数据库 + 延时双删
+        redisUtils.delete("staffCache::" + staff.getId());
+        redisUtils.clearPageCache("staffPage");
         //更新数据库
         staffService.updateById(staff);
+        //延时
+        Thread.sleep(200);
+        redisUtils.delete("staffCache::" + staff.getId());
+        redisUtils.clearPageCache("staffPage");
+
         //保存到 布隆过滤器
         bloomFilter.add(Integer.toString(staff.getId()));
-        //保存到 redis
-        redisUtils.set("staffCache::" + staff.getId(), staff);
-        redisUtils.clearPageCache("staffPage");
 
         //打印封装数据
         LayuiUtils<List<Staff>> result = new LayuiUtils<List<Staff>>("1", null,1,0);
@@ -126,13 +128,11 @@ public class StaffController {
     //产品删除
     @GetMapping("/deleteSelected")
     @ResponseBody
-    @CacheEvict(value = "staffCache", allEntries = true)  //清理 setmeal 缓存下的所有数据
+    @CacheEvict(value = "staffCache", allEntries = true)     //清理 staffCache 缓存下的所有数据
     public LayuiUtils<List<Staff>> deleteSelected(@RequestParam(value = "id", defaultValue = "") String ids) throws Exception {
-
         //删除数据库+缓存
         staffService.deleteSelected(ids);
         redisUtils.clearPageCache("staffPage");
-
         //打印封装数据
         LayuiUtils<List<Staff>> result = new LayuiUtils<List<Staff>>("1", null,1,0);
         return result;
@@ -142,16 +142,31 @@ public class StaffController {
     public ModelAndView loadData(@PathVariable("id") int id){
         //type 用来控制返回页面的类型
         ModelAndView mv = new ModelAndView();
-        Staff staff;
+        Staff staff = null;
         if (bloomFilter.mightContain(Integer.toString(id))) {
-            System.out.println("布隆过滤器存在该id, 使用 redis 查询");
+            log.info("布隆过滤器 ==> 存在该id, 使用 redis 查询");
             staff = (Staff)redisUtils.get(redisCache, id);
-        } else{
-            staff = staffService.getById(id);
-            //保存到 布隆过滤器
-            bloomFilter.add(Integer.toString(staff.getId()));
-            //保存到 redis
-            redisUtils.set("staffCache::" + staff.getId(), staff);
+        }
+        if(staff == null || !bloomFilter.mightContain(Integer.toString(id))) {
+            //不存在数据 - 加互斥锁
+            Boolean lock = redisUtils.getLock(Integer.toString(id), 10);
+            if (lock != null && lock) {
+                log.info("获取锁成功 ==> 查询数据库 - 保持到布隆过滤器");
+                // 获取到锁，从数据库中获取数据
+                staff = staffService.getById(id);
+                //保存到 布隆过滤器
+                bloomFilter.add(Integer.toString(staff.getId()));
+                //保存到 redis
+                redisUtils.set("staffCache::" + staff.getId(), staff);
+                // 释放锁
+                redisUtils.removeLock(Integer.toString(id));
+            } else {
+                // 未获取到锁，等待一段时间后重试
+                Time.sleep(100);
+                //重试
+                log.info("获取锁失败 ==> 重试");
+                return loadData(id);
+            }
         }
 
         //设置模型
@@ -226,8 +241,10 @@ public class StaffController {
             System.out.println(condition);
         } catch (RedisConnectionException e) {
             System.out.println("Redis 连接异常：" + e.getMessage());
-            condition = false; // 设置条件为 false
+            // 设置条件为 false
+            condition = false;
         }
+        //数据在 Redis中不存在
         if (!condition) {
             System.out.println("数据库");
             staffs = staffService.list();
@@ -237,28 +254,6 @@ public class StaffController {
                 bloomFilter.add(Integer.toString(staff.getId()));
             }
         }
-//        Cache cache = cacheManager.getCache("staffCache");
-//        boolean condition = redisUtils.checkCacheExists("staffCache*");
-//        System.out.println(condition);
-//        if (!condition) {
-//            System.out.println("数据库");
-//            staffs = staffService.list();
-//            for (Staff staff : staffs) {
-//                cache.put(staff.getId(), staff);
-//                //保存到 布隆过滤器
-//                bloomFilter.add(Integer.toString(staff.getId()));
-//            }
-//        }
-
-//        else {
-//            System.out.println("缓存");
-//            List<Object> objects = redisUtils.multiGet("staffPage::*");
-//            staffs = new ArrayList<>();
-//            for (Object value : objects) {
-//                Staff staff = (Staff) value;
-//                staffs.add(staff);
-//            }
-//        }
 
         //条件构造器对象
         LambdaQueryWrapper<Staff> queryWrapper = new LambdaQueryWrapper<>();

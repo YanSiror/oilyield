@@ -95,6 +95,19 @@ public class ProductController {
         return mv;
     }
 
+    @GetMapping("/seeData/{id}")
+    public ModelAndView seeData(@PathVariable("id") int id){
+        //type 用来控制返回页面的类型
+        ModelAndView mv = new ModelAndView();
+        Product product = productService.getById(id);
+        //设置模型
+        mv.addObject("product", product);
+        System.out.println(JSON.toJSONString(product));
+        //设置视图
+        mv.setViewName("product-infor");
+        return mv;
+    }
+
     @GetMapping("/delete")
     @ResponseBody
     public LayuiUtils<List<Product>> delete(@RequestParam(name="id",required = true)String id) {

@@ -15,6 +15,28 @@
     <link rel="stylesheet" th:href="@{/assets/lib/font-awesome-4.7.0/css/font-awesome.min.css}" media="all">
     <script th:src="@{/assets/layui.js}"></script>
 
+    <style>
+      /* 在不同设备上应用不同的样式 */
+      .layui-responsive {
+        width: 800px;
+        height: 600px;
+      }
+
+      @media screen and (max-width: 768px) {
+        .layui-responsive {
+          width: 600px;
+          height: 400px;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        .layui-responsive {
+          width: 400px;
+          height: 350px;
+        }
+      }
+    </style>
+
     <script>
       function modUser(token){
         var tokenInput = document.getElementsByName('token')[0];
@@ -100,12 +122,13 @@
             var productId = product.id;
             var url = "/uploads/products/" + product.img;
             var hot = '/uploads/hot.png';
+            var uri = '../product/getHeader?id=' + productId;
             console.log(url, productId, product)
             html += '<div class="col-sm-4">';
-            html +=     '<a href="#">';
+            html += '<a onclick="seeProduct(' + productId + ')">';
             html +=         '<div class="typeface-entry">';
             html +=             '<img src="' + hot + '" alt="" style="width: 30px; height: 30px;position: absolute;top: 6;right: 0;z-index: 1">'
-            html +=             '<img alt="产品图像" style="width: 110%;height:120%;position: relative;" src="' + url + '">';
+            html +=             '<img alt="产品图像" style="width: 110%;height:120%;position: relative;" src="' + uri + '">';
             html +=             '<h3 class="heading display-5 font-weight-400 text-dark"><b>' + product.name + '</b></h3>';
             html +=             '<p><b>' + product.infor + '</b></p>';
             html +=         '</div>';
@@ -115,7 +138,25 @@
           $('#productList').html(html);
         }
       });
+
+      //定义点击后的产品信息
+      function seeProduct(id){
+        layer.open({
+          //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+          type:2,
+          content:'/product/seeData/'+id,
+          offset: 'auto',
+          title: '产品详情',
+          id: 'see', //设定一个id，防止重复弹出
+          area: 'auto', // 自动根据内容调整大小
+          shadeClose: true,
+          skin: 'layui-responsive', // 使用响应式的样式类
+        });
+      }
     </script>
+
+
+
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-transparent navbar-dark bg-dark py-4">

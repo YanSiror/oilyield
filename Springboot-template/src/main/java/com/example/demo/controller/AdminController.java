@@ -487,6 +487,6 @@ public class AdminController {
         //参数一：图片对象
         //参数二：图片的格式，如PNG,JPG,GIF
         //参数三：图片输出到哪里去
-        ImageIO.write(image,"PNG",response.getOutputStream());
+        ImageIO.write(image,"PNG", response.getOutputStream());
     }
 }
